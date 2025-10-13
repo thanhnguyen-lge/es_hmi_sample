@@ -1,3 +1,4 @@
+import 'package:chart_sample_app/widgets/pie_chart_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -571,88 +572,7 @@ class ChartArea extends StatelessWidget {
   }
 
   Widget _buildPieChart(ChartProvider chartProvider) {
-    final data = chartProvider.pieChartData;
-
-    return Stack(
-      children: [
-        PieChart(
-          PieChartData(
-            sectionsSpace: 4,
-            centerSpaceRadius: 0,
-            startDegreeOffset: -90,
-            sections: _buildPieChartSections(data),
-            pieTouchData: _buildPieChartTouchData(),
-          ),
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeOutQuart,
-        ),
-        // 원형 그래프는 중앙 텍스트 없음 (중앙이 채워져 있음)
-      ],
-    );
-  }
-
-  /// 파이 차트 섹션 데이터 구성
-  List<PieChartSectionData> _buildPieChartSections(PieChartDataModel data) {
-    return [
-      PieChartSectionData(
-        color: Colors.blue.shade600,
-        value: data.currentUsage,
-        title: '${data.percentage.toStringAsFixed(1)}%',
-        radius: 120,
-        titleStyle: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
-        badgeWidget: _buildPieChartBadge(
-          icon: Icons.electrical_services,
-          color: Colors.blue.shade800,
-        ),
-        badgePositionPercentageOffset: 1.3,
-      ),
-      PieChartSectionData(
-        color: Colors.grey.shade300,
-        value: data.totalCapacity - data.currentUsage,
-        title: '${(100 - data.percentage).toStringAsFixed(1)}%',
-        radius: 100,
-        titleStyle: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          color: Colors.grey.shade700,
-        ),
-        badgeWidget: _buildPieChartBadge(
-          icon: Icons.battery_charging_full,
-          color: Colors.grey.shade500,
-        ),
-        badgePositionPercentageOffset: 1.3,
-      ),
-    ];
-  }
-
-  /// 파이 차트 배지 위젯
-  Widget _buildPieChartBadge({required IconData icon, required Color color}) {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Icon(
-        icon,
-        color: Colors.white,
-        size: 16,
-      ),
-    );
-  }
-
-  /// 파이 차트 터치 데이터 구성
-  PieTouchData _buildPieChartTouchData() {
-    return PieTouchData(
-      enabled: true,
-      touchCallback: (FlTouchEvent event, pieTouchResponse) {
-        // 터치 이벤트 처리 (향후 확장 가능)
-      },
-    );
+    return PieChartWidget(data: chartProvider.pieChartData);
   }
 
   /// 라인 차트 빌드
