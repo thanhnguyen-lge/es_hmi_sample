@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nested/nested.dart';
 import 'package:provider/provider.dart';
 import 'providers/chart_provider.dart';
 import 'screens/home_screen.dart';
@@ -13,9 +14,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-          create: (context) => ChartProvider(),
+      providers: <SingleChildWidget>[
+        ChangeNotifierProvider<ChartProvider>(
+          create: (BuildContext context) => ChartProvider(),
         ),
       ],
       child: MaterialApp(

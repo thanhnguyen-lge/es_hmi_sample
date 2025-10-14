@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:chart_sample_app/models/chart_data_models.dart';
 import 'package:chart_sample_app/widgets/donut_chart.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('DonutChart Widget Tests', () {
@@ -18,7 +18,7 @@ void main() {
 
     testWidgets('DonutChart는 올바르게 렌더링되어야 합니다', (WidgetTester tester) async {
       // Given
-      const title = '에너지 사용률';
+      const String title = '에너지 사용률';
 
       // When
       await tester.pumpWidget(
@@ -27,8 +27,6 @@ void main() {
             body: DonutChart(
               data: testData,
               title: title,
-              showPercentage: true,
-              showValues: true,
             ),
           ),
         ),
@@ -41,7 +39,7 @@ void main() {
 
     testWidgets('DonutChart는 제목을 표시해야 합니다', (WidgetTester tester) async {
       // Given
-      const title = '테스트 도넛 차트';
+      const String title = '테스트 도넛 차트';
 
       // When
       await tester.pumpWidget(
@@ -66,7 +64,6 @@ void main() {
           home: Scaffold(
             body: DonutChart(
               data: testData,
-              showPercentage: true,
               showValues: false,
             ),
           ),
@@ -85,7 +82,6 @@ void main() {
             body: DonutChart(
               data: testData,
               showPercentage: false,
-              showValues: true,
             ),
           ),
         ),
@@ -103,8 +99,6 @@ void main() {
           home: Scaffold(
             body: DonutChart(
               data: testData,
-              showPercentage: true,
-              showValues: true,
             ),
           ),
         ),
@@ -138,7 +132,7 @@ void main() {
     testWidgets('DonutChart는 중앙 텍스트를 표시할 수 있어야 합니다',
         (WidgetTester tester) async {
       // Given
-      const centerText = '사용량';
+      const String centerText = '사용량';
 
       // When
       await tester.pumpWidget(
@@ -147,8 +141,6 @@ void main() {
             body: DonutChart(
               data: testData,
               centerText: centerText,
-              showPercentage: true,
-              showValues: true,
             ),
           ),
         ),
@@ -165,7 +157,6 @@ void main() {
           home: Scaffold(
             body: DonutChart(
               data: testData,
-              title: '', // 빈 제목
             ),
           ),
         ),
@@ -179,7 +170,7 @@ void main() {
     testWidgets('DonutChart는 사용자 정의 중앙 공간 반지름을 가질 수 있어야 합니다',
         (WidgetTester tester) async {
       // Given
-      const customRadius = 80.0;
+      const double customRadius = 80.0;
 
       // When
       await tester.pumpWidget(
@@ -218,7 +209,7 @@ void main() {
     testWidgets('DonutChart는 사용자 정의 애니메이션 지속시간을 가질 수 있어야 합니다',
         (WidgetTester tester) async {
       // Given
-      const customDuration = Duration(milliseconds: 500);
+      const Duration customDuration = Duration(milliseconds: 500);
 
       // When
       await tester.pumpWidget(
@@ -239,7 +230,7 @@ void main() {
     testWidgets('DonutChart는 사용자 정의 여백을 가질 수 있어야 합니다',
         (WidgetTester tester) async {
       // Given
-      const customMargin = EdgeInsets.all(24);
+      const EdgeInsets customMargin = EdgeInsets.all(24);
 
       // When
       await tester.pumpWidget(
@@ -315,7 +306,7 @@ void main() {
     group('DonutChart 데이터 처리', () {
       testWidgets('차트는 0% 사용률을 처리할 수 있어야 합니다', (WidgetTester tester) async {
         // Given
-        final zeroUsageData = PieChartDataModel(
+        final PieChartDataModel zeroUsageData = PieChartDataModel(
           currentUsage: 0.0,
           totalCapacity: 100.0,
           primaryColor: Colors.blue,
@@ -329,8 +320,6 @@ void main() {
               body: DonutChart(
                 data: zeroUsageData,
                 title: '0% 사용률 테스트',
-                showPercentage: true,
-                showValues: true,
               ),
             ),
           ),
@@ -344,7 +333,7 @@ void main() {
 
       testWidgets('차트는 100% 사용률을 처리할 수 있어야 합니다', (WidgetTester tester) async {
         // Given
-        final fullUsageData = PieChartDataModel(
+        final PieChartDataModel fullUsageData = PieChartDataModel(
           currentUsage: 100.0,
           totalCapacity: 100.0,
           primaryColor: Colors.red,
@@ -358,8 +347,6 @@ void main() {
               body: DonutChart(
                 data: fullUsageData,
                 title: '100% 사용률 테스트',
-                showPercentage: true,
-                showValues: true,
               ),
             ),
           ),
@@ -373,7 +360,7 @@ void main() {
 
       testWidgets('차트는 소수점 값을 올바르게 표시해야 합니다', (WidgetTester tester) async {
         // Given
-        final decimalData = PieChartDataModel(
+        final PieChartDataModel decimalData = PieChartDataModel(
           currentUsage: 33.33,
           totalCapacity: 100.0,
           primaryColor: Colors.green,
@@ -387,8 +374,6 @@ void main() {
               body: DonutChart(
                 data: decimalData,
                 title: '소수점 테스트',
-                showPercentage: true,
-                showValues: true,
               ),
             ),
           ),

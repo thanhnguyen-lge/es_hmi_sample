@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/material.dart';
+
 import '../models/chart_data_models.dart';
 
 /// Donut Chart Widget using PieChart with center space
@@ -7,16 +8,6 @@ import '../models/chart_data_models.dart';
 /// fl_chart 라이브러리의 PieChart를 확장하여 중앙에 공간이 있는 도넛 형태의 차트를 생성합니다.
 /// 중앙에 퍼센티지와 현재/총계 값을 표시할 수 있습니다.
 class DonutChart extends StatefulWidget {
-  final PieChartDataModel data;
-  final String title;
-  final String centerText;
-  final double centerSpaceRadius;
-  final bool showPercentage;
-  final bool showValues;
-  final bool enableInteraction;
-  final EdgeInsets? margin;
-  final Duration animationDuration;
-
   const DonutChart({
     super.key,
     required this.data,
@@ -29,6 +20,15 @@ class DonutChart extends StatefulWidget {
     this.margin,
     this.animationDuration = const Duration(milliseconds: 800),
   });
+  final PieChartDataModel data;
+  final String title;
+  final String centerText;
+  final double centerSpaceRadius;
+  final bool showPercentage;
+  final bool showValues;
+  final bool enableInteraction;
+  final EdgeInsets? margin;
+  final Duration animationDuration;
 
   @override
   State<DonutChart> createState() => _DonutChartState();
@@ -65,8 +65,7 @@ class _DonutChartState extends State<DonutChart>
     return Container(
       margin: widget.margin ?? const EdgeInsets.all(16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
+        children: <Widget>[
           // 제목
           if (widget.title.isNotEmpty)
             Padding(
@@ -83,19 +82,19 @@ class _DonutChartState extends State<DonutChart>
           // 차트 영역
           Expanded(
             child: LayoutBuilder(
-              builder: (context, constraints) {
+              builder: (BuildContext context, BoxConstraints constraints) {
                 // 반응형 centerSpaceRadius 계산
-                final responsiveCenterRadius = constraints.maxWidth < 400
+                final double responsiveCenterRadius = constraints.maxWidth < 400
                     ? widget.centerSpaceRadius * 0.7
                     : widget.centerSpaceRadius;
 
                 return AnimatedBuilder(
                   animation: _animation,
-                  builder: (context, child) {
+                  builder: (BuildContext context, Widget? child) {
                     return AspectRatio(
                       aspectRatio: 1.0,
                       child: Stack(
-                        children: [
+                        children: <Widget>[
                           // PieChart
                           PieChart(
                             PieChartData(
@@ -117,7 +116,7 @@ class _DonutChartState extends State<DonutChart>
                             Center(
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
-                                children: [
+                                children: <Widget>[
                                   if (widget.showPercentage)
                                     Text(
                                       '${_getDisplayedPercentage().toStringAsFixed(1)}%',
@@ -174,7 +173,7 @@ class _DonutChartState extends State<DonutChart>
 
   /// PieChart 섹션 생성
   List<PieChartSectionData> _createSections() {
-    final List<PieChartSectionData> sections = [];
+    final List<PieChartSectionData> sections = <PieChartSectionData>[];
 
     // 사용량 섹션 (현재 사용량)
     if (widget.data.currentUsage > 0) {
@@ -195,7 +194,7 @@ class _DonutChartState extends State<DonutChart>
     }
 
     // 사용 가능량 섹션 (남은 용량)
-    final remainingCapacity =
+    final double remainingCapacity =
         widget.data.totalCapacity - widget.data.currentUsage;
     if (remainingCapacity > 0) {
       final bool isTouched = _touchedSectionIndex == 1;
@@ -221,7 +220,7 @@ class _DonutChartState extends State<DonutChart>
   PieTouchData _buildPieTouchData() {
     return PieTouchData(
       enabled: widget.enableInteraction,
-      touchCallback: (FlTouchEvent event, pieTouchResponse) {
+      touchCallback: (FlTouchEvent event, PieTouchResponse? pieTouchResponse) {
         setState(() {
           if (!event.isInterestedForInteractions ||
               pieTouchResponse == null ||

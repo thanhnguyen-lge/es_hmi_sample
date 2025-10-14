@@ -1,12 +1,13 @@
-import 'package:chart_sample_app/widgets/pie_chart_widget.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:fl_chart/fl_chart.dart';
-import '../providers/chart_provider.dart';
+
 import '../models/chart_data_models.dart';
-import 'stacked_bar_chart.dart';
+import '../providers/chart_provider.dart';
 import 'donut_chart.dart';
 import 'half_donut_chart.dart';
+import 'pie_chart_widget.dart';
+import 'stacked_bar_chart.dart';
 
 class ChartArea extends StatelessWidget {
   const ChartArea({super.key});
@@ -14,7 +15,8 @@ class ChartArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<ChartProvider>(
-      builder: (context, chartProvider, child) {
+      builder:
+          (BuildContext context, ChartProvider chartProvider, Widget? child) {
         return _buildChartContainer(context, chartProvider);
       },
     );
@@ -33,7 +35,7 @@ class ChartArea extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+          children: <Widget>[
             _buildChartHeader(context, chartProvider),
             const SizedBox(height: 16),
             _buildChartContent(context, chartProvider),
@@ -50,7 +52,7 @@ class ChartArea extends StatelessWidget {
     return BoxDecoration(
       color: Theme.of(context).cardColor,
       borderRadius: BorderRadius.circular(12),
-      boxShadow: [
+      boxShadow: <BoxShadow>[
         BoxShadow(
           color: Colors.grey.withValues(alpha: 0.1),
           spreadRadius: 1,
@@ -65,7 +67,7 @@ class ChartArea extends StatelessWidget {
   Widget _buildChartHeader(BuildContext context, ChartProvider chartProvider) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
+      children: <Widget>[
         _buildChartTitle(context, chartProvider),
         _buildChartTypeIndicator(context, chartProvider),
       ],
@@ -85,7 +87,7 @@ class ChartArea extends StatelessWidget {
   /// 차트 타입 표시기
   Widget _buildChartTypeIndicator(
       BuildContext context, ChartProvider chartProvider) {
-    final chartType = chartProvider.currentChartType;
+    final ChartType chartType = chartProvider.currentChartType;
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: 8,
@@ -97,7 +99,7 @@ class ChartArea extends StatelessWidget {
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        children: [
+        children: <Widget>[
           Icon(
             chartType.icon,
             size: 16,
@@ -138,7 +140,6 @@ class ChartArea extends StatelessWidget {
       borderRadius: BorderRadius.circular(8),
       border: Border.all(
         color: Colors.grey.withValues(alpha: 0.2),
-        width: 1,
       ),
     );
   }
@@ -172,7 +173,7 @@ class ChartArea extends StatelessWidget {
         );
       },
       child: Container(
-        key: ValueKey(chartProvider.currentChartType),
+        key: ValueKey<ChartType>(chartProvider.currentChartType),
         child: RepaintBoundary(
           child: _buildChart(chartProvider),
         ),
@@ -190,32 +191,26 @@ class ChartArea extends StatelessWidget {
         chart = _buildBarChart(chartProvider);
         accessibilityLabel =
             '막대 차트: ${chartProvider.barChartData.length}개의 데이터 포인트';
-        break;
       case ChartType.pie:
         chart = _buildPieChart(chartProvider);
         accessibilityLabel =
             '파이 차트: 현재 사용량 ${chartProvider.pieChartData.currentUsage}kWh, 전체 용량 ${chartProvider.pieChartData.totalCapacity}kWh';
-        break;
       case ChartType.line:
         chart = _buildLineChart(chartProvider);
         accessibilityLabel =
             '라인 차트: ${chartProvider.lineChartData.length}개의 시계열 데이터';
-        break;
       case ChartType.stackedBar:
         chart = _buildStackedBarChart(chartProvider);
         accessibilityLabel =
             '스택형 막대 차트: ${chartProvider.stackedBarChartData.length}개의 카테고리별 데이터';
-        break;
       case ChartType.donut:
         chart = _buildDonutChart(chartProvider);
         accessibilityLabel =
             '도넛 차트: 현재 사용량 ${chartProvider.pieChartData.currentUsage}kWh, 전체 용량 ${chartProvider.pieChartData.totalCapacity}kWh';
-        break;
       case ChartType.halfDonut:
         chart = _buildHalfDonutChart(chartProvider);
         accessibilityLabel =
             '반쪽 도넛 차트: 현재 사용량 ${chartProvider.pieChartData.currentUsage}kWh, 전체 용량 ${chartProvider.pieChartData.totalCapacity}kWh';
-        break;
     }
 
     return Semantics(
@@ -247,7 +242,7 @@ class ChartArea extends StatelessWidget {
 
   Widget _buildBarChartSummary(
       BuildContext context, ChartProvider chartProvider) {
-    final data = chartProvider.barChartData;
+    final List<BarChartDataModel> data = chartProvider.barChartData;
     if (data.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -259,7 +254,7 @@ class ChartArea extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
-        children: [
+        children: <Widget>[
           const Icon(
             Icons.info_outline,
             size: 20,
@@ -268,7 +263,7 @@ class ChartArea extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              '총 ${data.length}일 데이터 • 최대값: ${data.map((d) => d.totalUsage).reduce((a, b) => a > b ? a : b).toStringAsFixed(1)}kWh',
+              '총 ${data.length}일 데이터 • 최대값: ${data.map((BarChartDataModel d) => d.totalUsage).reduce((double a, double b) => a > b ? a : b).toStringAsFixed(1)}kWh',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.blue.shade700,
                   ),
@@ -281,7 +276,7 @@ class ChartArea extends StatelessWidget {
 
   Widget _buildPieChartSummary(
       BuildContext context, ChartProvider chartProvider) {
-    final data = chartProvider.pieChartData;
+    final PieChartDataModel data = chartProvider.pieChartData;
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -290,7 +285,7 @@ class ChartArea extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
-        children: [
+        children: <Widget>[
           const Icon(
             Icons.info_outline,
             size: 20,
@@ -311,13 +306,13 @@ class ChartArea extends StatelessWidget {
   }
 
   Widget _buildBarChart(ChartProvider chartProvider) {
-    final data = chartProvider.barChartData;
+    final List<BarChartDataModel> data = chartProvider.barChartData;
 
     if (data.isEmpty) {
       return _buildEmptyBarChart();
     }
 
-    final maxValue = _calculateMaxValue(data);
+    final double maxValue = _calculateMaxValue(data);
 
     return BarChart(
       BarChartData(
@@ -339,7 +334,7 @@ class ChartArea extends StatelessWidget {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+        children: <Widget>[
           Icon(
             Icons.bar_chart_outlined,
             size: 80,
@@ -363,7 +358,7 @@ class ChartArea extends StatelessWidget {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+        children: <Widget>[
           Icon(
             Icons.show_chart,
             size: 80,
@@ -384,7 +379,9 @@ class ChartArea extends StatelessWidget {
 
   /// 최대값 계산
   double _calculateMaxValue(List<BarChartDataModel> data) {
-    return data.map((d) => d.totalUsage).reduce((a, b) => a > b ? a : b);
+    return data
+        .map((BarChartDataModel d) => d.totalUsage)
+        .reduce((double a, double b) => a > b ? a : b);
   }
 
   /// 막대 차트 터치 데이터 구성
@@ -395,8 +392,9 @@ class ChartArea extends StatelessWidget {
       touchTooltipData: BarTouchTooltipData(
         tooltipPadding: const EdgeInsets.all(8),
         tooltipMargin: 8,
-        getTooltipItem: (group, groupIndex, rod, rodIndex) {
-          final item = data[group.x.toInt()];
+        getTooltipItem: (BarChartGroupData group, int groupIndex,
+            BarChartRodData rod, int rodIndex) {
+          final BarChartDataModel item = data[group.x];
           String categoryName = '';
           Color categoryColor = Colors.white;
 
@@ -449,18 +447,13 @@ class ChartArea extends StatelessWidget {
   /// 막대 차트 제목 데이터 구성
   FlTitlesData _buildBarChartTitles(List<BarChartDataModel> data) {
     return FlTitlesData(
-      show: true,
-      rightTitles: const AxisTitles(
-        sideTitles: SideTitles(showTitles: false),
-      ),
-      topTitles: const AxisTitles(
-        sideTitles: SideTitles(showTitles: false),
-      ),
+      rightTitles: const AxisTitles(),
+      topTitles: const AxisTitles(),
       bottomTitles: AxisTitles(
         sideTitles: SideTitles(
           showTitles: true,
           getTitlesWidget: (double value, TitleMeta meta) {
-            final index = value.toInt();
+            final int index = value.toInt();
             if (index >= 0 && index < data.length) {
               return Padding(
                 padding: const EdgeInsets.only(top: 8.0),
@@ -501,13 +494,13 @@ class ChartArea extends StatelessWidget {
   /// 막대 그룹 데이터 구성
   List<BarChartGroupData> _buildBarGroups(ChartProvider chartProvider,
       List<BarChartDataModel> data, double maxValue) {
-    return data.asMap().entries.map((entry) {
-      final index = entry.key;
-      final item = entry.value;
+    return data.asMap().entries.map((MapEntry<int, BarChartDataModel> entry) {
+      final int index = entry.key;
+      final BarChartDataModel item = entry.value;
 
       return BarChartGroupData(
         x: index,
-        barRods: [
+        barRods: <BarChartRodData>[
           BarChartRodData(
             toY: item.baseUsage,
             color: chartProvider.colorScheme.baseUsageColor,
@@ -516,7 +509,7 @@ class ChartArea extends StatelessWidget {
               topLeft: Radius.circular(2),
               topRight: Radius.circular(2),
             ),
-            rodStackItems: [],
+            rodStackItems: <BarChartRodStackItem>[],
             backDrawRodData: BackgroundBarChartRodData(
               show: true,
               toY: maxValue * 1.1,
@@ -558,11 +551,10 @@ class ChartArea extends StatelessWidget {
   /// 막대 차트 그리드 데이터 구성
   FlGridData _buildBarChartGrid(double maxValue) {
     return FlGridData(
-      show: true,
       drawVerticalLine: false,
       horizontalInterval:
           maxValue > 0 ? maxValue / 5 : 1.0, // Prevent zero interval
-      getDrawingHorizontalLine: (value) {
+      getDrawingHorizontalLine: (double value) {
         return FlLine(
           color: Colors.grey.withValues(alpha: 0.3),
           strokeWidth: 1,
@@ -577,30 +569,28 @@ class ChartArea extends StatelessWidget {
 
   /// 라인 차트 빌드
   Widget _buildLineChart(ChartProvider chartProvider) {
-    final data = chartProvider.lineChartData;
-    if (data.isEmpty || data.every((series) => series.dataPoints.isEmpty)) {
+    final List<LineChartDataModel> data = chartProvider.lineChartData;
+    if (data.isEmpty ||
+        data.every((LineChartDataModel series) => series.dataPoints.isEmpty)) {
       return _buildEmptyChart('라인 차트 데이터가 없습니다.');
     }
 
     // 모든 시리즈의 데이터포인트를 하나로 합치기 (첫 번째 시리즈만 사용)
-    final firstSeries = data.first;
-    final dataPoints = firstSeries.dataPoints;
+    final LineChartDataModel firstSeries = data.first;
+    final List<LineChartDataPoint> dataPoints = firstSeries.dataPoints;
 
     return LineChart(
       LineChartData(
         gridData: FlGridData(
-          show: true,
-          drawVerticalLine: true,
-          drawHorizontalLine: true,
           horizontalInterval: 1,
           verticalInterval: 1,
-          getDrawingHorizontalLine: (value) {
+          getDrawingHorizontalLine: (double value) {
             return FlLine(
               color: Colors.grey.withValues(alpha: 0.3),
               strokeWidth: 1,
             );
           },
-          getDrawingVerticalLine: (value) {
+          getDrawingVerticalLine: (double value) {
             return FlLine(
               color: Colors.grey.withValues(alpha: 0.3),
               strokeWidth: 1,
@@ -608,22 +598,17 @@ class ChartArea extends StatelessWidget {
           },
         ),
         titlesData: FlTitlesData(
-          show: true,
-          rightTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          topTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
+          rightTitles: const AxisTitles(),
+          topTitles: const AxisTitles(),
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
               reservedSize: 30,
               interval: 1,
               getTitlesWidget: (double value, TitleMeta meta) {
-                final index = value.toInt();
+                final int index = value.toInt();
                 if (index >= 0 && index < dataPoints.length) {
-                  final timestamp = dataPoints[index].timestamp;
+                  final DateTime? timestamp = dataPoints[index].timestamp;
                   if (timestamp != null) {
                     return Text(
                       '${timestamp.month}/${timestamp.day}',
@@ -661,25 +646,28 @@ class ChartArea extends StatelessWidget {
           show: true,
           border: Border.all(
             color: Colors.grey.withValues(alpha: 0.3),
-            width: 1,
           ),
         ),
         minX: 0,
         maxX: dataPoints.isNotEmpty ? (dataPoints.length - 1).toDouble() : 0,
         minY: 0,
         maxY: dataPoints.isNotEmpty
-            ? dataPoints.map((e) => e.value).reduce((a, b) => a > b ? a : b) + 1
+            ? dataPoints
+                    .map((LineChartDataPoint e) => e.value)
+                    .reduce((double a, double b) => a > b ? a : b) +
+                1
             : 10,
-        lineBarsData: [
+        lineBarsData: <LineChartBarData>[
           LineChartBarData(
             spots: dataPoints
                 .asMap()
                 .entries
-                .map((entry) => FlSpot(entry.key.toDouble(), entry.value.value))
+                .map((MapEntry<int, LineChartDataPoint> entry) =>
+                    FlSpot(entry.key.toDouble(), entry.value.value))
                 .toList(),
             isCurved: true,
             gradient: LinearGradient(
-              colors: [
+              colors: <Color>[
                 chartProvider.colorScheme.baseUsageColor,
                 chartProvider.colorScheme.baseUsageColor.withValues(alpha: 0.3),
               ],
@@ -687,8 +675,8 @@ class ChartArea extends StatelessWidget {
             barWidth: 3,
             isStrokeCapRound: true,
             dotData: FlDotData(
-              show: true,
-              getDotPainter: (spot, percent, barData, index) {
+              getDotPainter: (FlSpot spot, double percent,
+                  LineChartBarData barData, int index) {
                 return FlDotCirclePainter(
                   radius: 4,
                   color: chartProvider.colorScheme.baseUsageColor,
@@ -700,7 +688,7 @@ class ChartArea extends StatelessWidget {
             belowBarData: BarAreaData(
               show: true,
               gradient: LinearGradient(
-                colors: [
+                colors: <Color>[
                   chartProvider.colorScheme.baseUsageColor
                       .withValues(alpha: 0.3),
                   chartProvider.colorScheme.baseUsageColor
@@ -713,14 +701,13 @@ class ChartArea extends StatelessWidget {
           ),
         ],
         lineTouchData: LineTouchData(
-          enabled: true,
           touchTooltipData: LineTouchTooltipData(
             getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
-              return touchedBarSpots.map((barSpot) {
-                final index = barSpot.x.toInt();
+              return touchedBarSpots.map((LineBarSpot barSpot) {
+                final int index = barSpot.x.toInt();
                 if (index >= 0 && index < dataPoints.length) {
-                  final point = dataPoints[index];
-                  final timestamp = point.timestamp;
+                  final LineChartDataPoint point = dataPoints[index];
+                  final DateTime? timestamp = point.timestamp;
                   if (timestamp != null) {
                     return LineTooltipItem(
                       '${timestamp.month}/${timestamp.day}\n${point.value.toStringAsFixed(1)} kWh',
@@ -743,22 +730,27 @@ class ChartArea extends StatelessWidget {
   /// 라인 차트 요약 정보
   Widget _buildLineChartSummary(
       BuildContext context, ChartProvider chartProvider) {
-    final data = chartProvider.lineChartData;
-    if (data.isEmpty || data.every((series) => series.dataPoints.isEmpty)) {
+    final List<LineChartDataModel> data = chartProvider.lineChartData;
+    if (data.isEmpty ||
+        data.every((LineChartDataModel series) => series.dataPoints.isEmpty)) {
       return const SizedBox.shrink();
     }
 
     // 첫 번째 시리즈의 데이터포인트를 사용
-    final firstSeries = data.first;
-    final dataPoints = firstSeries.dataPoints;
+    final LineChartDataModel firstSeries = data.first;
+    final List<LineChartDataPoint> dataPoints = firstSeries.dataPoints;
 
-    final maxValue =
-        dataPoints.map((e) => e.value).reduce((a, b) => a > b ? a : b);
-    final minValue =
-        dataPoints.map((e) => e.value).reduce((a, b) => a < b ? a : b);
-    final avgValue = dataPoints.map((e) => e.value).reduce((a, b) => a + b) /
+    final double maxValue = dataPoints
+        .map((LineChartDataPoint e) => e.value)
+        .reduce((double a, double b) => a > b ? a : b);
+    final double minValue = dataPoints
+        .map((LineChartDataPoint e) => e.value)
+        .reduce((double a, double b) => a < b ? a : b);
+    final double avgValue = dataPoints
+            .map((LineChartDataPoint e) => e.value)
+            .reduce((double a, double b) => a + b) /
         dataPoints.length;
-    final latestValue = dataPoints.last.value;
+    final double latestValue = dataPoints.last.value;
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -767,12 +759,11 @@ class ChartArea extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: Colors.grey.withValues(alpha: 0.2),
-          width: 1,
         ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        children: <Widget>[
           Text(
             '라인 차트 요약',
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
@@ -782,7 +773,7 @@ class ChartArea extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
+            children: <Widget>[
               _buildSummaryItem(
                 context,
                 '최신값',
@@ -827,7 +818,7 @@ class ChartArea extends StatelessWidget {
     Color color,
   ) {
     return Column(
-      children: [
+      children: <Widget>[
         Icon(
           icon,
           size: 20,
@@ -870,9 +861,6 @@ class ChartArea extends StatelessWidget {
       xAxisTitle: '월',
       yAxisTitle: '사용량 (kWh)',
       maxY: chartProvider.maxStackedBarChartValue * 1.1,
-      showLegend: true,
-      showTooltip: true,
-      enableInteraction: true,
       animationDuration: const Duration(milliseconds: 1000),
     );
   }
@@ -880,25 +868,28 @@ class ChartArea extends StatelessWidget {
   /// 스택형 막대 차트 요약 정보
   Widget _buildStackedBarChartSummary(
       BuildContext context, ChartProvider chartProvider) {
-    final data = chartProvider.stackedBarChartData;
+    final List<StackedBarChartData> data = chartProvider.stackedBarChartData;
     if (data.isEmpty) {
       return const SizedBox.shrink();
     }
 
     // 전체 기간 총 사용량 계산
-    final totalUsage = data.fold(0.0, (sum, item) => sum + item.totalUsage);
-    final averageUsage = totalUsage / data.length;
+    final double totalUsage = data.fold(
+        0.0, (double sum, StackedBarChartData item) => sum + item.totalUsage);
+    final double averageUsage = totalUsage / data.length;
 
     // 최대/최소 사용량 계산
-    final maxUsage =
-        data.map((item) => item.totalUsage).reduce((a, b) => a > b ? a : b);
-    final minUsage =
-        data.map((item) => item.totalUsage).reduce((a, b) => a < b ? a : b);
+    final double maxUsage = data
+        .map((StackedBarChartData item) => item.totalUsage)
+        .reduce((double a, double b) => a > b ? a : b);
+    final double minUsage = data
+        .map((StackedBarChartData item) => item.totalUsage)
+        .reduce((double a, double b) => a < b ? a : b);
 
     // 카테고리별 총 사용량 계산
-    final Map<String, double> categoryTotals = {};
-    for (var item in data) {
-      item.values.forEach((key, value) {
+    final Map<String, double> categoryTotals = <String, double>{};
+    for (final StackedBarChartData item in data) {
+      item.values.forEach((String key, double value) {
         categoryTotals[key] = (categoryTotals[key] ?? 0.0) + value;
       });
     }
@@ -912,9 +903,9 @@ class ChartArea extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        children: <Widget>[
           Row(
-            children: [
+            children: <Widget>[
               Icon(
                 Icons.stacked_bar_chart,
                 size: 16,
@@ -934,7 +925,7 @@ class ChartArea extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
+            children: <Widget>[
               _buildStackedSummaryItem(
                 '총 사용량',
                 '${totalUsage.toStringAsFixed(1)} kWh',
@@ -957,7 +948,7 @@ class ChartArea extends StatelessWidget {
               ),
             ],
           ),
-          if (categoryTotals.isNotEmpty) ...[
+          if (categoryTotals.isNotEmpty) ...<Widget>[
             const SizedBox(height: 12),
             const Divider(height: 1),
             const SizedBox(height: 8),
@@ -974,7 +965,8 @@ class ChartArea extends StatelessWidget {
               spacing: 12,
               runSpacing: 4,
               children: categoryTotals.entries
-                  .map((entry) => _buildCategoryTotal(entry.key, entry.value))
+                  .map((MapEntry<String, double> entry) =>
+                      _buildCategoryTotal(entry.key, entry.value))
                   .toList(),
             ),
           ],
@@ -986,7 +978,7 @@ class ChartArea extends StatelessWidget {
   /// 스택형 차트 요약 아이템
   Widget _buildStackedSummaryItem(String label, String value, Color color) {
     return Column(
-      children: [
+      children: <Widget>[
         Text(
           label,
           style: TextStyle(
@@ -1011,7 +1003,7 @@ class ChartArea extends StatelessWidget {
   Widget _buildCategoryTotal(String category, double total) {
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: [
+      children: <Widget>[
         Container(
           width: 8,
           height: 8,
@@ -1054,9 +1046,6 @@ class ChartArea extends StatelessWidget {
       data: chartProvider.pieChartData,
       title: '에너지 사용률',
       centerText: '사용량',
-      showPercentage: true,
-      showValues: true,
-      enableInteraction: true,
       animationDuration: const Duration(milliseconds: 1000),
     );
   }
@@ -1064,7 +1053,7 @@ class ChartArea extends StatelessWidget {
   /// 도넛 차트 요약 정보
   Widget _buildDonutChartSummary(
       BuildContext context, ChartProvider chartProvider) {
-    final data = chartProvider.pieChartData;
+    final PieChartDataModel data = chartProvider.pieChartData;
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -1075,9 +1064,9 @@ class ChartArea extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        children: <Widget>[
           Row(
-            children: [
+            children: <Widget>[
               Icon(
                 Icons.donut_large,
                 size: 16,
@@ -1097,7 +1086,7 @@ class ChartArea extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
+            children: <Widget>[
               _buildDonutSummaryItem(
                 '현재 사용량',
                 '${data.currentUsage.toStringAsFixed(1)} kWh',
@@ -1130,7 +1119,7 @@ class ChartArea extends StatelessWidget {
   /// 도넛 차트 요약 아이템
   Widget _buildDonutSummaryItem(String label, String value, Color color) {
     return Column(
-      children: [
+      children: <Widget>[
         Text(
           label,
           style: TextStyle(
@@ -1157,9 +1146,6 @@ class ChartArea extends StatelessWidget {
       data: chartProvider.pieChartData,
       title: '에너지 사용률 게이지',
       centerText: '현재 순시',
-      showPercentage: true,
-      showValues: true,
-      enableInteraction: true,
       animationDuration: const Duration(milliseconds: 1200),
     );
   }
@@ -1167,7 +1153,7 @@ class ChartArea extends StatelessWidget {
   /// 반쪽 도넛 차트 요약 정보
   Widget _buildHalfDonutChartSummary(
       BuildContext context, ChartProvider chartProvider) {
-    final data = chartProvider.pieChartData;
+    final PieChartDataModel data = chartProvider.pieChartData;
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -1178,9 +1164,9 @@ class ChartArea extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        children: <Widget>[
           Row(
-            children: [
+            children: <Widget>[
               Icon(
                 Icons.donut_small,
                 size: 16,
@@ -1200,7 +1186,7 @@ class ChartArea extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
+            children: <Widget>[
               _buildHalfDonutSummaryItem(
                 '현재 사용량',
                 '${data.currentUsage.toStringAsFixed(1)} kWh',
@@ -1243,7 +1229,7 @@ class ChartArea extends StatelessWidget {
   /// 반쪽 도넛 차트 요약 아이템
   Widget _buildHalfDonutSummaryItem(String label, String value, Color color) {
     return Column(
-      children: [
+      children: <Widget>[
         Text(
           label,
           style: TextStyle(

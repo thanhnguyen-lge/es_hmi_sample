@@ -5,7 +5,7 @@ import 'chart_data_models.dart';
 class ChartDataHelper {
   /// 막대 그래프용 샘플 데이터 (7일간의 전력 사용량)
   static List<BarChartDataModel> getSampleBarChartData() {
-    return [
+    return <BarChartDataModel>[
       BarChartDataModel(
         label: '1일',
         baseUsage: 40.0,
@@ -70,10 +70,12 @@ class ChartDataHelper {
 
   /// 막대 그래프 데이터의 최대값 계산
   static double getMaxValueFromBarData(List<BarChartDataModel> data) {
-    if (data.isEmpty) return 100.0;
+    if (data.isEmpty) {
+      return 100.0;
+    }
 
     double maxValue = 0.0;
-    for (var item in data) {
+    for (final BarChartDataModel item in data) {
       if (item.totalUsage > maxValue) {
         maxValue = item.totalUsage;
       }
@@ -85,9 +87,9 @@ class ChartDataHelper {
 
   /// 차트 색상에 해당하는 범례 데이터 생성
   static List<LegendItem> getBarChartLegends() {
-    const colorScheme = ChartColorScheme.defaultScheme;
+    const ChartColorScheme colorScheme = ChartColorScheme.defaultScheme;
 
-    return [
+    return <LegendItem>[
       LegendItem(
         label: '기본 사용량',
         color: colorScheme.baseUsageColor,
@@ -109,7 +111,7 @@ class ChartDataHelper {
 
   /// 빈 막대 그래프 데이터 생성 (초기값용)
   static List<BarChartDataModel> getEmptyBarChartData(int dayCount) {
-    return List.generate(dayCount, (index) {
+    return List<BarChartDataModel>.generate(dayCount, (int index) {
       return BarChartDataModel(
         label: '${index + 1}일',
         baseUsage: 0.0,
@@ -132,14 +134,13 @@ class ChartDataHelper {
 
   /// 라인 차트용 샘플 데이터 (시간별 전력 사용량)
   static List<LineChartDataModel> getSampleLineChartData() {
-    final now = DateTime.now();
+    final DateTime now = DateTime.now();
 
-    return [
+    return <LineChartDataModel>[
       LineChartDataModel(
         seriesName: '총 사용량',
-        lineColor: Colors.blue,
         lineWidth: 3.0,
-        dataPoints: [
+        dataPoints: <LineChartDataPoint>[
           LineChartDataPoint(
             label: '00:00',
             value: 45.0,
@@ -180,8 +181,7 @@ class ChartDataHelper {
       LineChartDataModel(
         seriesName: '기본 사용량',
         lineColor: Colors.amber,
-        lineWidth: 2.0,
-        dataPoints: [
+        dataPoints: <LineChartDataPoint>[
           LineChartDataPoint(label: '00:00', value: 25.0),
           LineChartDataPoint(label: '04:00', value: 20.0),
           LineChartDataPoint(label: '08:00', value: 40.0),
@@ -196,22 +196,24 @@ class ChartDataHelper {
 
   /// 빈 라인 차트 데이터 생성
   static List<LineChartDataModel> getEmptyLineChartData() {
-    return [
+    return <LineChartDataModel>[
       LineChartDataModel(
         seriesName: '데이터 없음',
         lineColor: Colors.grey,
-        dataPoints: [],
+        dataPoints: <LineChartDataPoint>[],
       ),
     ];
   }
 
   /// 라인 차트 데이터에서 최대값 계산
   static double getMaxValueFromLineData(List<LineChartDataModel> data) {
-    if (data.isEmpty) return 100.0;
+    if (data.isEmpty) {
+      return 100.0;
+    }
 
     double maxValue = 0.0;
-    for (final series in data) {
-      final seriesMax = series.maxValue;
+    for (final LineChartDataModel series in data) {
+      final double seriesMax = series.maxValue;
       if (seriesMax > maxValue) {
         maxValue = seriesMax;
       }
@@ -221,11 +223,13 @@ class ChartDataHelper {
 
   /// 라인 차트 데이터에서 최소값 계산
   static double getMinValueFromLineData(List<LineChartDataModel> data) {
-    if (data.isEmpty) return 0.0;
+    if (data.isEmpty) {
+      return 0.0;
+    }
 
     double minValue = double.infinity;
-    for (final series in data) {
-      final seriesMin = series.minValue;
+    for (final LineChartDataModel series in data) {
+      final double seriesMin = series.minValue;
       if (seriesMin < minValue) {
         minValue = seriesMin;
       }
@@ -236,11 +240,10 @@ class ChartDataHelper {
 
 /// 범례 아이템을 위한 모델
 class LegendItem {
-  final String label;
-  final Color color;
-
   const LegendItem({
     required this.label,
     required this.color,
   });
+  final String label;
+  final Color color;
 }

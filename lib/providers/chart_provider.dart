@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import '../models/chart_data_models.dart';
+
 import '../models/chart_data_helper.dart';
+import '../models/chart_data_models.dart';
 
 /// 차트 데이터와 UI 상태를 관리하는 Provider 클래스
 class ChartProvider extends ChangeNotifier {
   // Private fields
-  List<BarChartDataModel> _barChartData = [];
+  List<BarChartDataModel> _barChartData = <BarChartDataModel>[];
   PieChartDataModel _pieChartData = ChartDataHelper.getEmptyPieChartData();
-  List<LineChartDataModel> _lineChartData = [];
-  List<StackedBarChartData> _stackedBarChartData = [];
+  List<LineChartDataModel> _lineChartData = <LineChartDataModel>[];
+  List<StackedBarChartData> _stackedBarChartData = <StackedBarChartData>[];
   ChartType _currentChartType = ChartType.bar;
   ChartColorScheme _colorScheme = ChartColorScheme.defaultScheme;
   bool _isLoading = false;
@@ -18,12 +19,13 @@ class ChartProvider extends ChangeNotifier {
   List<LegendItem>? _cachedLegends;
 
   // Getters
-  List<BarChartDataModel> get barChartData => List.unmodifiable(_barChartData);
+  List<BarChartDataModel> get barChartData =>
+      List<BarChartDataModel>.unmodifiable(_barChartData);
   PieChartDataModel get pieChartData => _pieChartData;
   List<LineChartDataModel> get lineChartData =>
-      List.unmodifiable(_lineChartData);
+      List<LineChartDataModel>.unmodifiable(_lineChartData);
   List<StackedBarChartData> get stackedBarChartData =>
-      List.unmodifiable(_stackedBarChartData);
+      List<StackedBarChartData>.unmodifiable(_stackedBarChartData);
   ChartType get currentChartType => _currentChartType;
   bool get isBarChart => _currentChartType == ChartType.bar;
   bool get isPieChart => _currentChartType == ChartType.pie;
@@ -66,7 +68,7 @@ class ChartProvider extends ChangeNotifier {
       _barChartData = ChartDataHelper.getEmptyBarChartData(7);
       _pieChartData = ChartDataHelper.getEmptyPieChartData();
       _lineChartData = ChartDataHelper.getEmptyLineChartData();
-      _stackedBarChartData = [];
+      _stackedBarChartData = <StackedBarChartData>[];
     } finally {
       _setLoading(false);
     }
@@ -84,26 +86,22 @@ class ChartProvider extends ChangeNotifier {
       return;
     }
 
-    final currentData = _barChartData[index];
+    final BarChartDataModel currentData = _barChartData[index];
     BarChartDataModel updatedData;
 
     switch (category.toLowerCase()) {
       case 'base':
       case 'baseusage':
         updatedData = currentData.copyWith(baseUsage: value);
-        break;
       case 'ac':
       case 'acusage':
         updatedData = currentData.copyWith(acUsage: value);
-        break;
       case 'heating':
       case 'heatingusage':
         updatedData = currentData.copyWith(heatingUsage: value);
-        break;
       case 'etc':
       case 'etcusage':
         updatedData = currentData.copyWith(etcUsage: value);
-        break;
       default:
         debugPrint('ChartProvider: 알 수 없는 카테고리 - $category');
         return;
@@ -129,8 +127,8 @@ class ChartProvider extends ChangeNotifier {
       return;
     }
 
-    final currentData = _barChartData[index];
-    final updatedData = currentData.copyWith(
+    final BarChartDataModel currentData = _barChartData[index];
+    final BarChartDataModel updatedData = currentData.copyWith(
       baseUsage: baseUsage,
       acUsage: acUsage,
       heatingUsage: heatingUsage,
@@ -209,22 +207,16 @@ class ChartProvider extends ChangeNotifier {
     switch (_currentChartType) {
       case ChartType.bar:
         _currentChartType = ChartType.pie;
-        break;
       case ChartType.pie:
         _currentChartType = ChartType.line;
-        break;
       case ChartType.line:
         _currentChartType = ChartType.stackedBar;
-        break;
       case ChartType.stackedBar:
         _currentChartType = ChartType.donut;
-        break;
       case ChartType.donut:
         _currentChartType = ChartType.halfDonut;
-        break;
       case ChartType.halfDonut:
         _currentChartType = ChartType.bar;
-        break;
     }
     notifyListeners();
 
@@ -254,16 +246,12 @@ class ChartProvider extends ChangeNotifier {
     switch (colorType.toLowerCase()) {
       case 'base':
         _colorScheme = _colorScheme.copyWith(baseUsageColor: color);
-        break;
       case 'ac':
         _colorScheme = _colorScheme.copyWith(acUsageColor: color);
-        break;
       case 'heating':
         _colorScheme = _colorScheme.copyWith(heatingUsageColor: color);
-        break;
       case 'etc':
         _colorScheme = _colorScheme.copyWith(etcUsageColor: color);
-        break;
       default:
         debugPrint('ChartProvider: 알 수 없는 색상 타입 - $colorType');
         return;
@@ -315,7 +303,7 @@ class ChartProvider extends ChangeNotifier {
 
   /// 막대 그래프에 새로운 날짜 데이터 추가
   void addBarChartData(String label) {
-    final newData = BarChartDataModel(
+    final BarChartDataModel newData = BarChartDataModel(
       label: label,
       baseUsage: 0.0,
       acUsage: 0.0,
@@ -331,9 +319,10 @@ class ChartProvider extends ChangeNotifier {
 
   /// 샘플 데이터 추가
   void addSampleData() {
-    final sampleData = ChartDataHelper.getSampleBarChartData();
+    final List<BarChartDataModel> sampleData =
+        ChartDataHelper.getSampleBarChartData();
     if (sampleData.isNotEmpty) {
-      final newData = sampleData.first.copyWith(
+      final BarChartDataModel newData = sampleData.first.copyWith(
         label: '${DateTime.now().month}/${DateTime.now().day}',
       );
       _barChartData.add(newData);
@@ -345,7 +334,7 @@ class ChartProvider extends ChangeNotifier {
   /// 막대 그래프 데이터 제거
   void removeBarChartData(int index) {
     if (index >= 0 && index < _barChartData.length) {
-      final removedLabel = _barChartData[index].label;
+      final String removedLabel = _barChartData[index].label;
       _barChartData.removeAt(index);
       notifyListeners();
 
@@ -367,7 +356,7 @@ class ChartProvider extends ChangeNotifier {
 
   /// 스택형 막대 차트 샘플 데이터 생성
   List<StackedBarChartData> _generateSampleStackedBarData() {
-    return [
+    return <StackedBarChartData>[
       StackedBarChartData.fromUsageData(
         category: 'Jan',
         baseUsage: 45.0,
@@ -415,7 +404,7 @@ class ChartProvider extends ChangeNotifier {
 
   /// 스택형 막대 차트 데이터 업데이트
   void updateStackedBarChartData(List<StackedBarChartData> newData) {
-    _stackedBarChartData = List.from(newData);
+    _stackedBarChartData = List<StackedBarChartData>.from(newData);
     notifyListeners();
 
     debugPrint(
@@ -433,7 +422,7 @@ class ChartProvider extends ChangeNotifier {
   /// 스택형 막대 차트 데이터 제거
   void removeStackedBarChartData(int index) {
     if (index >= 0 && index < _stackedBarChartData.length) {
-      final removedCategory = _stackedBarChartData[index].category;
+      final String removedCategory = _stackedBarChartData[index].category;
       _stackedBarChartData.removeAt(index);
       notifyListeners();
 
@@ -443,11 +432,13 @@ class ChartProvider extends ChangeNotifier {
 
   /// 스택형 막대 차트 최대값 계산
   double get maxStackedBarChartValue {
-    if (_stackedBarChartData.isEmpty) return 100.0;
+    if (_stackedBarChartData.isEmpty) {
+      return 100.0;
+    }
 
     return _stackedBarChartData
-        .map((item) => item.totalUsage)
-        .reduce((max, current) => current > max ? current : max);
+        .map((StackedBarChartData item) => item.totalUsage)
+        .reduce((double max, double current) => current > max ? current : max);
   }
 
   /// 캐시 클리어 및 리스너 알림

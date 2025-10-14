@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/chart_provider.dart';
+
 import '../models/chart_data_models.dart';
+import '../providers/chart_provider.dart';
 
 class ControlPanel extends StatelessWidget {
   const ControlPanel({super.key});
@@ -9,14 +10,15 @@ class ControlPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<ChartProvider>(
-      builder: (context, chartProvider, child) {
+      builder:
+          (BuildContext context, ChartProvider chartProvider, Widget? child) {
         return Card(
           elevation: 4,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+              children: <Widget>[
                 _buildPanelTitle(context),
                 const SizedBox(height: 16),
                 _buildChartTypeSection(context, chartProvider),
@@ -50,9 +52,9 @@ class ControlPanel extends StatelessWidget {
       title: '차트 타입',
       icon: Icons.swap_horiz,
       child: Column(
-        children: [
+        children: <Widget>[
           Row(
-            children: [
+            children: <Widget>[
               Expanded(
                 child: _buildChartTypeButton(
                   context,
@@ -76,7 +78,7 @@ class ControlPanel extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Row(
-            children: [
+            children: <Widget>[
               Expanded(
                 child: _buildChartTypeButton(
                   context,
@@ -100,7 +102,7 @@ class ControlPanel extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Row(
-            children: [
+            children: <Widget>[
               Expanded(
                 child: _buildChartTypeButton(
                   context,
@@ -135,13 +137,13 @@ class ControlPanel extends StatelessWidget {
       title: '데이터 조작',
       icon: Icons.tune,
       child: Column(
-        children: [
+        children: <Widget>[
           // 차트 타입별 슬라이더 표시
           ..._buildSliderControls(context, chartProvider),
           const SizedBox(height: 16),
           // 리셋 버튼
           Row(
-            children: [
+            children: <Widget>[
               Expanded(
                 child: ElevatedButton.icon(
                   onPressed: () => chartProvider.initializeData(),
@@ -184,10 +186,12 @@ class ControlPanel extends StatelessWidget {
   /// Bar Chart용 슬라이더들
   List<Widget> _buildBarChartSliders(
       BuildContext context, ChartProvider chartProvider) {
-    if (chartProvider.barChartData.isEmpty) return [];
+    if (chartProvider.barChartData.isEmpty) {
+      return <Widget>[];
+    }
 
-    final data = chartProvider.barChartData.first;
-    List<Widget> sliders = [];
+    final BarChartDataModel data = chartProvider.barChartData.first;
+    final List<Widget> sliders = <Widget>[];
 
     // 각 사용량 카테고리별 슬라이더
     sliders.add(_buildSlider(
@@ -196,7 +200,7 @@ class ControlPanel extends StatelessWidget {
       value: data.baseUsage,
       min: 0,
       max: 100,
-      onChanged: (value) {
+      onChanged: (double value) {
         chartProvider.updateBarDataCategory(0, 'base', value);
       },
     ));
@@ -209,7 +213,7 @@ class ControlPanel extends StatelessWidget {
       value: data.acUsage,
       min: 0,
       max: 100,
-      onChanged: (value) {
+      onChanged: (double value) {
         chartProvider.updateBarDataCategory(0, 'ac', value);
       },
     ));
@@ -222,7 +226,7 @@ class ControlPanel extends StatelessWidget {
       value: data.heatingUsage,
       min: 0,
       max: 100,
-      onChanged: (value) {
+      onChanged: (double value) {
         chartProvider.updateBarDataCategory(0, 'heating', value);
       },
     ));
@@ -235,7 +239,7 @@ class ControlPanel extends StatelessWidget {
       value: data.etcUsage,
       min: 0,
       max: 100,
-      onChanged: (value) {
+      onChanged: (double value) {
         chartProvider.updateBarDataCategory(0, 'etc', value);
       },
     ));
@@ -246,11 +250,11 @@ class ControlPanel extends StatelessWidget {
   /// Pie Chart용 슬라이더들
   List<Widget> _buildPieChartSliders(
       BuildContext context, ChartProvider chartProvider) {
-    final data = chartProvider.pieChartData;
-    List<Widget> sliders = [];
+    final PieChartDataModel data = chartProvider.pieChartData;
+    final List<Widget> sliders = <Widget>[];
 
     // 안전한 최대값 계산 (현재 사용량과 총 용량 중 큰 값의 1.5배)
-    final safeMaxCapacity = (data.totalCapacity > data.currentUsage
+    final double safeMaxCapacity = (data.totalCapacity > data.currentUsage
             ? data.totalCapacity
             : data.currentUsage) *
         1.5;
@@ -261,7 +265,7 @@ class ControlPanel extends StatelessWidget {
       value: data.currentUsage,
       min: 0,
       max: safeMaxCapacity,
-      onChanged: (value) {
+      onChanged: (double value) {
         chartProvider.updatePieCurrentUsage(value);
       },
     ));
@@ -274,7 +278,7 @@ class ControlPanel extends StatelessWidget {
       value: data.totalCapacity,
       min: 0,
       max: safeMaxCapacity,
-      onChanged: (value) {
+      onChanged: (double value) {
         chartProvider.updatePieTotalCapacity(value);
       },
     ));
@@ -285,25 +289,28 @@ class ControlPanel extends StatelessWidget {
   /// Line Chart용 슬라이더들
   List<Widget> _buildLineChartSliders(
       BuildContext context, ChartProvider chartProvider) {
-    if (chartProvider.lineChartData.isEmpty) return [];
+    if (chartProvider.lineChartData.isEmpty) {
+      return <Widget>[];
+    }
 
-    final data = chartProvider.lineChartData.first;
-    List<Widget> sliders = [];
+    final LineChartDataModel data = chartProvider.lineChartData.first;
+    final List<Widget> sliders = <Widget>[];
 
     // 최신 몇 개의 데이터 포인트에 대한 슬라이더 제공
-    final pointsToShow =
+    final int pointsToShow =
         data.dataPoints.length > 3 ? 3 : data.dataPoints.length;
-    final recentPoints = data.dataPoints.take(pointsToShow).toList();
+    final List<LineChartDataPoint> recentPoints =
+        data.dataPoints.take(pointsToShow).toList();
 
     for (int i = 0; i < recentPoints.length; i++) {
-      final point = recentPoints[i];
+      final LineChartDataPoint point = recentPoints[i];
       sliders.add(_buildSlider(
         context: context,
         label: point.label.isNotEmpty ? point.label : '포인트 ${i + 1}',
         value: point.value,
         min: 0,
         max: 100,
-        onChanged: (value) {
+        onChanged: (double value) {
           // Line chart 데이터 업데이트를 위한 간단한 구현
           // 실제로는 ChartProvider에 적절한 메서드가 필요
           // 여기서는 시뮬레이션용으로 간단하게 구현
@@ -320,11 +327,13 @@ class ControlPanel extends StatelessWidget {
   /// Stacked Bar Chart용 슬라이더들
   List<Widget> _buildStackedBarChartSliders(
       BuildContext context, ChartProvider chartProvider) {
-    if (chartProvider.stackedBarChartData.isEmpty) return [];
+    if (chartProvider.stackedBarChartData.isEmpty) {
+      return <Widget>[];
+    }
 
     // StackedBarChartData의 실제 구조를 확인하여 적절히 구현
     // 현재는 기본적인 구조만 제공
-    List<Widget> sliders = [];
+    final List<Widget> sliders = <Widget>[];
     sliders.add(
       Text(
         '스택 차트 데이터 조작',
@@ -358,10 +367,10 @@ class ControlPanel extends StatelessWidget {
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      children: <Widget>[
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
+          children: <Widget>[
             Text(
               label,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -412,33 +421,33 @@ class ControlPanel extends StatelessWidget {
       title: '색상 설정',
       icon: Icons.palette,
       child: Column(
-        children: [
+        children: <Widget>[
           _buildColorPicker(
             context,
             '기본 색상',
             chartProvider.colorScheme.baseUsageColor,
-            (color) => chartProvider.updateColor('base', color),
+            (Color color) => chartProvider.updateColor('base', color),
           ),
           const SizedBox(height: 8),
           _buildColorPicker(
             context,
             '에어컨 색상',
             chartProvider.colorScheme.acUsageColor,
-            (color) => chartProvider.updateColor('ac', color),
+            (Color color) => chartProvider.updateColor('ac', color),
           ),
           const SizedBox(height: 8),
           _buildColorPicker(
             context,
             '난방 색상',
             chartProvider.colorScheme.heatingUsageColor,
-            (color) => chartProvider.updateColor('heating', color),
+            (Color color) => chartProvider.updateColor('heating', color),
           ),
           const SizedBox(height: 8),
           _buildColorPicker(
             context,
             '기타 색상',
             chartProvider.colorScheme.etcUsageColor,
-            (color) => chartProvider.updateColor('etc', color),
+            (Color color) => chartProvider.updateColor('etc', color),
           ),
         ],
       ),
@@ -462,9 +471,9 @@ class ControlPanel extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        children: <Widget>[
           Row(
-            children: [
+            children: <Widget>[
               Icon(icon, size: 18, color: Theme.of(context).primaryColor),
               const SizedBox(width: 8),
               Text(
@@ -489,7 +498,7 @@ class ControlPanel extends StatelessWidget {
     required IconData icon,
     required String label,
   }) {
-    final isSelected = chartProvider.currentChartType == chartType;
+    final bool isSelected = chartProvider.currentChartType == chartType;
     return Semantics(
       label: '$label로 차트 변경',
       selected: isSelected,
@@ -511,7 +520,7 @@ class ControlPanel extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
           child: Column(
-            children: [
+            children: <Widget>[
               Icon(
                 icon,
                 color: isSelected
@@ -544,7 +553,7 @@ class ControlPanel extends StatelessWidget {
     ValueChanged<Color> onColorChanged,
   ) {
     return Row(
-      children: [
+      children: <Widget>[
         Container(
           width: 24,
           height: 24,
@@ -575,7 +584,7 @@ class ControlPanel extends StatelessWidget {
     Color currentColor,
     ValueChanged<Color> onColorChanged,
   ) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -586,7 +595,7 @@ class ControlPanel extends StatelessWidget {
               onColorChanged: onColorChanged,
             ),
           ),
-          actions: [
+          actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: const Text('확인'),
@@ -599,18 +608,17 @@ class ControlPanel extends StatelessWidget {
 }
 
 class BlockPicker extends StatelessWidget {
-  final Color pickerColor;
-  final ValueChanged<Color> onColorChanged;
-
   const BlockPicker({
     super.key,
     required this.pickerColor,
     required this.onColorChanged,
   });
+  final Color pickerColor;
+  final ValueChanged<Color> onColorChanged;
 
   @override
   Widget build(BuildContext context) {
-    final colors = [
+    final List<MaterialColor> colors = <MaterialColor>[
       Colors.red,
       Colors.pink,
       Colors.purple,
@@ -633,7 +641,7 @@ class BlockPicker extends StatelessWidget {
     ];
 
     return Wrap(
-      children: colors.map((color) {
+      children: colors.map((MaterialColor color) {
         return GestureDetector(
           onTap: () => onColorChanged(color),
           child: Container(
@@ -644,7 +652,7 @@ class BlockPicker extends StatelessWidget {
               color: color,
               borderRadius: BorderRadius.circular(4),
               border: pickerColor == color
-                  ? Border.all(color: Colors.black, width: 3)
+                  ? Border.all(width: 3)
                   : Border.all(color: Colors.grey.shade300),
             ),
           ),

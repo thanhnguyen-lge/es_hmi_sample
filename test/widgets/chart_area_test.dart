@@ -1,10 +1,10 @@
+import 'package:chart_sample_app/models/chart_data_models.dart';
+import 'package:chart_sample_app/providers/chart_provider.dart';
+import 'package:chart_sample_app/widgets/chart_area.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
-import 'package:fl_chart/fl_chart.dart';
-import 'package:chart_sample_app/widgets/chart_area.dart';
-import 'package:chart_sample_app/providers/chart_provider.dart';
-import 'package:chart_sample_app/models/chart_data_models.dart';
 
 void main() {
   group('ChartArea Widget Tests', () {
@@ -198,7 +198,7 @@ void main() {
     testWidgets('should handle provider errors gracefully',
         (WidgetTester tester) async {
       // Given - Provider with potential error state
-      final provider = ChartProvider();
+      final ChartProvider provider = ChartProvider();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -224,7 +224,7 @@ void main() {
     testWidgets('should rebuild efficiently when provider changes',
         (WidgetTester tester) async {
       // Given
-      final provider = ChartProvider();
+      final ChartProvider provider = ChartProvider();
 
       await tester.pumpWidget(
         MaterialApp(

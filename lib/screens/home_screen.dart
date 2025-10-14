@@ -20,7 +20,8 @@ class HomeScreen extends StatelessWidget {
         centerTitle: true,
       ),
       body: Consumer<ChartProvider>(
-        builder: (context, chartProvider, child) {
+        builder:
+            (BuildContext context, ChartProvider chartProvider, Widget? child) {
           if (chartProvider.isLoading) {
             return const Center(
               child: CircularProgressIndicator(),
@@ -28,9 +29,9 @@ class HomeScreen extends StatelessWidget {
           }
 
           return LayoutBuilder(
-            builder: (context, constraints) {
+            builder: (BuildContext context, BoxConstraints constraints) {
               // 반응형 브레이크포인트: 768px
-              final isTabletOrDesktop = constraints.maxWidth >= 768;
+              final bool isTabletOrDesktop = constraints.maxWidth >= 768;
 
               if (isTabletOrDesktop) {
                 // 데스크톱/태블릿: 좌우 분할 레이아웃
@@ -51,13 +52,13 @@ class HomeScreen extends StatelessWidget {
       BuildContext context, ChartProvider chartProvider) {
     return SafeArea(
       child: Row(
-        children: [
+        children: <Widget>[
           // 차트 영역 (왼쪽, 70% 너비)
-          Expanded(
+          const Expanded(
             flex: 7,
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: const ChartArea(),
+              padding: EdgeInsets.all(16.0),
+              child: ChartArea(),
             ),
           ),
 
@@ -68,11 +69,11 @@ class HomeScreen extends StatelessWidget {
           ),
 
           // 컨트롤 패널 (오른쪽, 30% 너비)
-          Expanded(
+          const Expanded(
             flex: 3,
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: const ControlPanel(),
+              padding: EdgeInsets.all(16.0),
+              child: ControlPanel(),
             ),
           ),
         ],
@@ -83,7 +84,7 @@ class HomeScreen extends StatelessWidget {
   /// 모바일용 상하 분할 레이아웃
   Widget _buildMobileLayout(BuildContext context, ChartProvider chartProvider) {
     return Column(
-      children: [
+      children: <Widget>[
         // 차트 영역 (상단, 60% 높이)
         Expanded(
           flex: 6,

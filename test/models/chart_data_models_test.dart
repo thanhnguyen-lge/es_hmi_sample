@@ -1,19 +1,19 @@
+import 'package:chart_sample_app/models/chart_data_models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chart_sample_app/models/chart_data_models.dart';
 
 void main() {
   group('BarChartDataModel Tests', () {
     test('should create BarChartDataModel with correct values', () {
       // Arrange
-      const label = '1일';
-      const baseUsage = 40.0;
-      const acUsage = 30.0;
-      const heatingUsage = 20.0;
-      const etcUsage = 10.0;
+      const String label = '1일';
+      const double baseUsage = 40.0;
+      const double acUsage = 30.0;
+      const double heatingUsage = 20.0;
+      const double etcUsage = 10.0;
 
       // Act
-      final model = BarChartDataModel(
+      final BarChartDataModel model = BarChartDataModel(
         label: label,
         baseUsage: baseUsage,
         acUsage: acUsage,
@@ -31,7 +31,7 @@ void main() {
 
     test('should calculate total usage correctly', () {
       // Arrange
-      final model = BarChartDataModel(
+      final BarChartDataModel model = BarChartDataModel(
         label: '1일',
         baseUsage: 40.0,
         acUsage: 30.0,
@@ -40,7 +40,7 @@ void main() {
       );
 
       // Act
-      final totalUsage = model.totalUsage;
+      final double totalUsage = model.totalUsage;
 
       // Assert
       expect(totalUsage, equals(100.0));
@@ -48,7 +48,7 @@ void main() {
 
     test('should handle zero values correctly', () {
       // Arrange
-      final model = BarChartDataModel(
+      final BarChartDataModel model = BarChartDataModel(
         label: '빈 날',
         baseUsage: 0.0,
         acUsage: 0.0,
@@ -62,7 +62,7 @@ void main() {
 
     test('should create copy with updated values using copyWith', () {
       // Arrange
-      final original = BarChartDataModel(
+      final BarChartDataModel original = BarChartDataModel(
         label: '1일',
         baseUsage: 40.0,
         acUsage: 30.0,
@@ -71,7 +71,7 @@ void main() {
       );
 
       // Act
-      final updated = original.copyWith(
+      final BarChartDataModel updated = original.copyWith(
         label: '수정된 날',
         baseUsage: 50.0,
       );
@@ -90,7 +90,7 @@ void main() {
 
     test('should convert to JSON correctly', () {
       // Arrange
-      final model = BarChartDataModel(
+      final BarChartDataModel model = BarChartDataModel(
         label: '1일',
         baseUsage: 40.0,
         acUsage: 30.0,
@@ -99,7 +99,7 @@ void main() {
       );
 
       // Act
-      final json = model.toJson();
+      final Map<String, dynamic> json = model.toJson();
 
       // Assert
       expect(json['label'], equals('1일'));
@@ -111,7 +111,7 @@ void main() {
 
     test('should create from JSON correctly', () {
       // Arrange
-      final json = {
+      final Map<String, Object> json = <String, Object>{
         'label': '테스트 날',
         'baseUsage': 45.5,
         'acUsage': 35.2,
@@ -120,7 +120,7 @@ void main() {
       };
 
       // Act
-      final model = BarChartDataModel.fromJson(json);
+      final BarChartDataModel model = BarChartDataModel.fromJson(json);
 
       // Assert
       expect(model.label, equals('테스트 날'));
@@ -132,7 +132,7 @@ void main() {
 
     test('should handle decimal values correctly', () {
       // Arrange
-      final model = BarChartDataModel(
+      final BarChartDataModel model = BarChartDataModel(
         label: '소수점 테스트',
         baseUsage: 12.34,
         acUsage: 56.78,
@@ -141,7 +141,7 @@ void main() {
       );
 
       // Act
-      final totalUsage = model.totalUsage;
+      final double totalUsage = model.totalUsage;
 
       // Assert
       expect(totalUsage, closeTo(81.69, 0.01));
@@ -151,13 +151,13 @@ void main() {
   group('PieChartDataModel Tests', () {
     test('should create PieChartDataModel with correct values', () {
       // Arrange
-      const currentUsage = 800.0;
-      const totalCapacity = 4800.0;
-      const primaryColor = Colors.blue;
-      const backgroundColor = Colors.grey;
+      const double currentUsage = 800.0;
+      const double totalCapacity = 4800.0;
+      const MaterialColor primaryColor = Colors.blue;
+      const MaterialColor backgroundColor = Colors.grey;
 
       // Act
-      final model = PieChartDataModel(
+      final PieChartDataModel model = PieChartDataModel(
         currentUsage: currentUsage,
         totalCapacity: totalCapacity,
         primaryColor: primaryColor,
@@ -173,7 +173,7 @@ void main() {
 
     test('should calculate percentage correctly', () {
       // Arrange
-      final model = PieChartDataModel(
+      final PieChartDataModel model = PieChartDataModel(
         currentUsage: 800.0,
         totalCapacity: 4800.0,
         primaryColor: Colors.blue,
@@ -181,7 +181,7 @@ void main() {
       );
 
       // Act
-      final percentage = model.percentage;
+      final double percentage = model.percentage;
 
       // Assert
       expect(percentage, closeTo(16.67, 0.01));
@@ -189,7 +189,7 @@ void main() {
 
     test('should handle zero total capacity without error', () {
       // Arrange
-      final model = PieChartDataModel(
+      final PieChartDataModel model = PieChartDataModel(
         currentUsage: 100.0,
         totalCapacity: 0.0,
         primaryColor: Colors.blue,
@@ -197,7 +197,7 @@ void main() {
       );
 
       // Act
-      final percentage = model.percentage;
+      final double percentage = model.percentage;
 
       // Assert
       expect(percentage, equals(0.0));
@@ -205,7 +205,7 @@ void main() {
 
     test('should handle 100% usage correctly', () {
       // Arrange
-      final model = PieChartDataModel(
+      final PieChartDataModel model = PieChartDataModel(
         currentUsage: 1000.0,
         totalCapacity: 1000.0,
         primaryColor: Colors.red,
@@ -213,7 +213,7 @@ void main() {
       );
 
       // Act
-      final percentage = model.percentage;
+      final double percentage = model.percentage;
 
       // Assert
       expect(percentage, equals(100.0));
@@ -221,7 +221,7 @@ void main() {
 
     test('should create copy with updated values using copyWith', () {
       // Arrange
-      final original = PieChartDataModel(
+      final PieChartDataModel original = PieChartDataModel(
         currentUsage: 800.0,
         totalCapacity: 4800.0,
         primaryColor: Colors.blue,
@@ -229,7 +229,7 @@ void main() {
       );
 
       // Act
-      final updated = original.copyWith(
+      final PieChartDataModel updated = original.copyWith(
         currentUsage: 1200.0,
         primaryColor: Colors.red,
       );
@@ -247,7 +247,7 @@ void main() {
 
     test('should convert to JSON correctly', () {
       // Arrange
-      final model = PieChartDataModel(
+      final PieChartDataModel model = PieChartDataModel(
         currentUsage: 800.0,
         totalCapacity: 4800.0,
         primaryColor: Colors.blue,
@@ -255,7 +255,7 @@ void main() {
       );
 
       // Act
-      final json = model.toJson();
+      final Map<String, dynamic> json = model.toJson();
 
       // Assert
       expect(json['currentUsage'], equals(800.0));
@@ -266,7 +266,7 @@ void main() {
 
     test('should create from JSON with default colors', () {
       // Arrange
-      final json = {
+      final Map<String, num> json = <String, num>{
         'currentUsage': 1000.0,
         'totalCapacity': 5000.0,
         'primaryColor': 123456,
@@ -274,7 +274,7 @@ void main() {
       };
 
       // Act
-      final model = PieChartDataModel.fromJson(json);
+      final PieChartDataModel model = PieChartDataModel.fromJson(json);
 
       // Assert
       expect(model.currentUsage, equals(1000.0));
@@ -287,7 +287,7 @@ void main() {
   group('ChartColorScheme Tests', () {
     test('should use default color scheme correctly', () {
       // Arrange & Act
-      const colorScheme = ChartColorScheme.defaultScheme;
+      const ChartColorScheme colorScheme = ChartColorScheme.defaultScheme;
 
       // Assert
       expect(colorScheme.baseUsageColor, equals(Colors.amber));
@@ -298,10 +298,10 @@ void main() {
 
     test('should return colors list correctly', () {
       // Arrange
-      const colorScheme = ChartColorScheme.defaultScheme;
+      const ChartColorScheme colorScheme = ChartColorScheme.defaultScheme;
 
       // Act
-      final colors = colorScheme.colors;
+      final List<Color> colors = colorScheme.colors;
 
       // Assert
       expect(colors.length, equals(4));
@@ -313,10 +313,10 @@ void main() {
 
     test('should create copy with updated colors using copyWith', () {
       // Arrange
-      const original = ChartColorScheme.defaultScheme;
+      const ChartColorScheme original = ChartColorScheme.defaultScheme;
 
       // Act
-      final updated = original.copyWith(
+      final ChartColorScheme updated = original.copyWith(
         baseUsageColor: Colors.green,
         acUsageColor: Colors.purple,
       );
@@ -330,7 +330,7 @@ void main() {
 
     test('should create custom color scheme', () {
       // Arrange & Act
-      const customScheme = ChartColorScheme(
+      const ChartColorScheme customScheme = ChartColorScheme(
         baseUsageColor: Colors.orange,
         acUsageColor: Colors.cyan,
         heatingUsageColor: Colors.pink,

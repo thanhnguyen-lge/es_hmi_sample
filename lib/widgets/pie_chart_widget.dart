@@ -1,12 +1,12 @@
-import 'package:chart_sample_app/models/chart_data_models.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
+import '../models/chart_data_models.dart';
+
 /// 원형 차트 위젯 - 터치 상호작용 지원
 class PieChartWidget extends StatefulWidget {
-  final PieChartDataModel data;
-
   const PieChartWidget({super.key, required this.data});
+  final PieChartDataModel data;
 
   @override
   State<PieChartWidget> createState() => _PieChartWidgetState();
@@ -18,7 +18,7 @@ class _PieChartWidgetState extends State<PieChartWidget> {
   @override
   Widget build(BuildContext context) {
     return Stack(
-      children: [
+      children: <Widget>[
         PieChart(
           PieChartData(
             sectionsSpace: 4,
@@ -27,7 +27,8 @@ class _PieChartWidgetState extends State<PieChartWidget> {
             sections: _buildPieChartSections(),
             pieTouchData: PieTouchData(
               enabled: true,
-              touchCallback: (FlTouchEvent event, pieTouchResponse) {
+              touchCallback:
+                  (FlTouchEvent event, PieTouchResponse? pieTouchResponse) {
                 setState(() {
                   if (!event.isInterestedForInteractions ||
                       pieTouchResponse == null ||
@@ -50,7 +51,7 @@ class _PieChartWidgetState extends State<PieChartWidget> {
 
   /// 파이 차트 섹션 데이터 구성
   List<PieChartSectionData> _buildPieChartSections() {
-    return [
+    return <PieChartSectionData>[
       PieChartSectionData(
         color: Colors.blue.shade600,
         value: widget.data.currentUsage,

@@ -1,14 +1,15 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:chart_sample_app/models/chart_data_helper.dart';
 import 'package:chart_sample_app/models/chart_data_models.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('ChartDataHelper Tests', () {
     group('getSampleBarChartData', () {
       test('should return 7 days of sample data', () {
         // Act
-        final data = ChartDataHelper.getSampleBarChartData();
+        final List<BarChartDataModel> data =
+            ChartDataHelper.getSampleBarChartData();
 
         // Assert
         expect(data.length, equals(7));
@@ -16,7 +17,8 @@ void main() {
 
       test('should return data with correct labels', () {
         // Act
-        final data = ChartDataHelper.getSampleBarChartData();
+        final List<BarChartDataModel> data =
+            ChartDataHelper.getSampleBarChartData();
 
         // Assert
         expect(data[0].label, equals('1일'));
@@ -30,10 +32,11 @@ void main() {
 
       test('should return data with positive values', () {
         // Act
-        final data = ChartDataHelper.getSampleBarChartData();
+        final List<BarChartDataModel> data =
+            ChartDataHelper.getSampleBarChartData();
 
         // Assert
-        for (var item in data) {
+        for (final BarChartDataModel item in data) {
           expect(item.baseUsage, greaterThanOrEqualTo(0));
           expect(item.acUsage, greaterThanOrEqualTo(0));
           expect(item.heatingUsage, greaterThanOrEqualTo(0));
@@ -44,7 +47,8 @@ void main() {
 
       test('should return data with expected total usage values', () {
         // Act
-        final data = ChartDataHelper.getSampleBarChartData();
+        final List<BarChartDataModel> data =
+            ChartDataHelper.getSampleBarChartData();
 
         // Assert
         expect(data[0].totalUsage, equals(100.0)); // 40+30+20+10
@@ -60,7 +64,7 @@ void main() {
     group('getSamplePieChartData', () {
       test('should return pie chart data with correct values', () {
         // Act
-        final data = ChartDataHelper.getSamplePieChartData();
+        final PieChartDataModel data = ChartDataHelper.getSamplePieChartData();
 
         // Assert
         expect(data.currentUsage, equals(800.0));
@@ -71,7 +75,7 @@ void main() {
 
       test('should return pie chart data with correct percentage', () {
         // Act
-        final data = ChartDataHelper.getSamplePieChartData();
+        final PieChartDataModel data = ChartDataHelper.getSamplePieChartData();
 
         // Assert
         expect(data.percentage, closeTo(16.67, 0.01)); // 800/4800 * 100
@@ -81,10 +85,11 @@ void main() {
     group('getMaxValueFromBarData', () {
       test('should return correct max value from sample data', () {
         // Arrange
-        final data = ChartDataHelper.getSampleBarChartData();
+        final List<BarChartDataModel> data =
+            ChartDataHelper.getSampleBarChartData();
 
         // Act
-        final maxValue = ChartDataHelper.getMaxValueFromBarData(data);
+        final double maxValue = ChartDataHelper.getMaxValueFromBarData(data);
 
         // Assert
         // 최대값은 195.0 (6일), 10% 추가하면 214.5
@@ -93,10 +98,11 @@ void main() {
 
       test('should return 100.0 for empty data', () {
         // Arrange
-        final emptyData = <BarChartDataModel>[];
+        final List<BarChartDataModel> emptyData = <BarChartDataModel>[];
 
         // Act
-        final maxValue = ChartDataHelper.getMaxValueFromBarData(emptyData);
+        final double maxValue =
+            ChartDataHelper.getMaxValueFromBarData(emptyData);
 
         // Assert
         expect(maxValue, equals(100.0));
@@ -104,7 +110,7 @@ void main() {
 
       test('should handle single item correctly', () {
         // Arrange
-        final singleData = [
+        final List<BarChartDataModel> singleData = <BarChartDataModel>[
           BarChartDataModel(
             label: '단일 데이터',
             baseUsage: 50.0,
@@ -115,7 +121,8 @@ void main() {
         ];
 
         // Act
-        final maxValue = ChartDataHelper.getMaxValueFromBarData(singleData);
+        final double maxValue =
+            ChartDataHelper.getMaxValueFromBarData(singleData);
 
         // Assert
         // 총합 110.0에 10% 추가하면 121.0
@@ -124,7 +131,7 @@ void main() {
 
       test('should handle zero values correctly', () {
         // Arrange
-        final zeroData = [
+        final List<BarChartDataModel> zeroData = <BarChartDataModel>[
           BarChartDataModel(
             label: '0 데이터',
             baseUsage: 0.0,
@@ -135,7 +142,8 @@ void main() {
         ];
 
         // Act
-        final maxValue = ChartDataHelper.getMaxValueFromBarData(zeroData);
+        final double maxValue =
+            ChartDataHelper.getMaxValueFromBarData(zeroData);
 
         // Assert
         // 0에 10% 추가해도 0이므로 최소값 처리가 필요할 수 있음
@@ -146,7 +154,7 @@ void main() {
     group('getBarChartLegends', () {
       test('should return 4 legend items', () {
         // Act
-        final legends = ChartDataHelper.getBarChartLegends();
+        final List<LegendItem> legends = ChartDataHelper.getBarChartLegends();
 
         // Assert
         expect(legends.length, equals(4));
@@ -154,7 +162,7 @@ void main() {
 
       test('should return legend items with correct labels', () {
         // Act
-        final legends = ChartDataHelper.getBarChartLegends();
+        final List<LegendItem> legends = ChartDataHelper.getBarChartLegends();
 
         // Assert
         expect(legends[0].label, equals('기본 사용량'));
@@ -165,7 +173,7 @@ void main() {
 
       test('should return legend items with correct colors', () {
         // Act
-        final legends = ChartDataHelper.getBarChartLegends();
+        final List<LegendItem> legends = ChartDataHelper.getBarChartLegends();
 
         // Assert
         expect(legends[0].color, equals(Colors.amber));
@@ -178,8 +186,10 @@ void main() {
     group('getEmptyBarChartData', () {
       test('should return correct number of empty data items', () {
         // Act
-        final emptyData3 = ChartDataHelper.getEmptyBarChartData(3);
-        final emptyData7 = ChartDataHelper.getEmptyBarChartData(7);
+        final List<BarChartDataModel> emptyData3 =
+            ChartDataHelper.getEmptyBarChartData(3);
+        final List<BarChartDataModel> emptyData7 =
+            ChartDataHelper.getEmptyBarChartData(7);
 
         // Assert
         expect(emptyData3.length, equals(3));
@@ -188,7 +198,8 @@ void main() {
 
       test('should return data with sequential labels', () {
         // Act
-        final emptyData = ChartDataHelper.getEmptyBarChartData(5);
+        final List<BarChartDataModel> emptyData =
+            ChartDataHelper.getEmptyBarChartData(5);
 
         // Assert
         expect(emptyData[0].label, equals('1일'));
@@ -200,10 +211,11 @@ void main() {
 
       test('should return data with all zero values', () {
         // Act
-        final emptyData = ChartDataHelper.getEmptyBarChartData(3);
+        final List<BarChartDataModel> emptyData =
+            ChartDataHelper.getEmptyBarChartData(3);
 
         // Assert
-        for (var item in emptyData) {
+        for (final BarChartDataModel item in emptyData) {
           expect(item.baseUsage, equals(0.0));
           expect(item.acUsage, equals(0.0));
           expect(item.heatingUsage, equals(0.0));
@@ -214,7 +226,8 @@ void main() {
 
       test('should handle zero count', () {
         // Act
-        final emptyData = ChartDataHelper.getEmptyBarChartData(0);
+        final List<BarChartDataModel> emptyData =
+            ChartDataHelper.getEmptyBarChartData(0);
 
         // Assert
         expect(emptyData.length, equals(0));
@@ -225,7 +238,8 @@ void main() {
     group('getEmptyPieChartData', () {
       test('should return pie chart data with zero usage', () {
         // Act
-        final emptyData = ChartDataHelper.getEmptyPieChartData();
+        final PieChartDataModel emptyData =
+            ChartDataHelper.getEmptyPieChartData();
 
         // Assert
         expect(emptyData.currentUsage, equals(0.0));
@@ -235,7 +249,8 @@ void main() {
 
       test('should return pie chart data with default colors', () {
         // Act
-        final emptyData = ChartDataHelper.getEmptyPieChartData();
+        final PieChartDataModel emptyData =
+            ChartDataHelper.getEmptyPieChartData();
 
         // Assert
         expect(emptyData.primaryColor, isA<Color>());
@@ -247,11 +262,11 @@ void main() {
   group('LegendItem Tests', () {
     test('should create LegendItem with correct values', () {
       // Arrange
-      const label = '테스트 범례';
-      const color = Colors.purple;
+      const String label = '테스트 범례';
+      const MaterialColor color = Colors.purple;
 
       // Act
-      const legendItem = LegendItem(
+      const LegendItem legendItem = LegendItem(
         label: label,
         color: color,
       );

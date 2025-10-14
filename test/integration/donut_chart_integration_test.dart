@@ -1,8 +1,8 @@
+import 'package:chart_sample_app/models/chart_data_models.dart';
+import 'package:chart_sample_app/providers/chart_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:chart_sample_app/providers/chart_provider.dart';
-import 'package:chart_sample_app/models/chart_data_models.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -10,7 +10,7 @@ void main() {
   group('도넛 차트 통합 테스트', () {
     testWidgets('도넛 차트 기본 기능 테스트', (WidgetTester tester) async {
       // Given - Provider 직접 테스트 (UI 렌더링 없이)
-      final chartProvider = ChartProvider()..initializeData();
+      final ChartProvider chartProvider = ChartProvider()..initializeData();
 
       // When - 도넛 차트로 직접 전환
       chartProvider.setChartType(ChartType.donut);
@@ -23,7 +23,7 @@ void main() {
 
     testWidgets('도넛 차트 데이터 관리 테스트', (WidgetTester tester) async {
       // Given - Provider 생성
-      final chartProvider = ChartProvider()..initializeData();
+      final ChartProvider chartProvider = ChartProvider()..initializeData();
 
       // When - 파이 차트 데이터 업데이트 (도넛 차트는 같은 데이터 모델 사용)
       chartProvider.updatePieData(
@@ -43,7 +43,7 @@ void main() {
 
     testWidgets('도넛 차트 계산 기능 테스트', (WidgetTester tester) async {
       // Given - Provider 생성
-      final chartProvider = ChartProvider()..initializeData();
+      final ChartProvider chartProvider = ChartProvider()..initializeData();
 
       // When - 특정 데이터로 설정
       chartProvider.updatePieData(
@@ -51,7 +51,7 @@ void main() {
         totalCapacity: 100.0,
       );
 
-      final data = chartProvider.pieChartData;
+      final PieChartDataModel data = chartProvider.pieChartData;
 
       // Then - 계산 기능들이 올바르게 작동하는지 확인
       expect(data.percentage, 75.0);
@@ -59,13 +59,13 @@ void main() {
       expect(data.totalCapacity, 100.0);
 
       // 사용 가능량 계산
-      final remaining = data.totalCapacity - data.currentUsage;
+      final double remaining = data.totalCapacity - data.currentUsage;
       expect(remaining, 25.0);
     });
 
     testWidgets('도넛 차트 타입 전환 테스트', (WidgetTester tester) async {
       // Given - Provider 생성
-      final chartProvider = ChartProvider()..initializeData();
+      final ChartProvider chartProvider = ChartProvider()..initializeData();
 
       // When & Then - 차트 타입 전환 순서 확인
       expect(chartProvider.currentChartType, ChartType.bar);
@@ -95,7 +95,7 @@ void main() {
 
     testWidgets('도넛 차트 경계값 테스트', (WidgetTester tester) async {
       // Given - Provider 생성
-      final chartProvider = ChartProvider()..initializeData();
+      final ChartProvider chartProvider = ChartProvider()..initializeData();
 
       // When & Then - 0% 사용률 테스트
       chartProvider.updatePieData(
@@ -128,22 +128,22 @@ void main() {
 
     testWidgets('도넛 차트 데이터 유효성 테스트', (WidgetTester tester) async {
       // Given - Provider 생성
-      final chartProvider = ChartProvider()..initializeData();
+      final ChartProvider chartProvider = ChartProvider()..initializeData();
 
       // When & Then - 음수 값 처리 (Provider에서 검증됨)
-      final originalUsage = chartProvider.pieChartData.currentUsage;
+      final double originalUsage = chartProvider.pieChartData.currentUsage;
 
       // 음수 사용량은 무시되어야 함
       chartProvider.updatePieCurrentUsage(-10.0);
       expect(chartProvider.pieChartData.currentUsage, originalUsage);
 
       // When & Then - 용량 초과 값 처리
-      final totalCapacity = chartProvider.pieChartData.totalCapacity;
+      final double totalCapacity = chartProvider.pieChartData.totalCapacity;
       chartProvider.updatePieCurrentUsage(totalCapacity + 10);
       expect(chartProvider.pieChartData.currentUsage, originalUsage);
 
       // When & Then - 0 이하 총 용량 처리
-      final originalCapacity = chartProvider.pieChartData.totalCapacity;
+      final double originalCapacity = chartProvider.pieChartData.totalCapacity;
       chartProvider.updatePieTotalCapacity(0);
       expect(chartProvider.pieChartData.totalCapacity, originalCapacity);
 
@@ -153,10 +153,10 @@ void main() {
 
     testWidgets('도넛 차트 성능 테스트', (WidgetTester tester) async {
       // Given - Provider 생성
-      final chartProvider = ChartProvider()..initializeData();
+      final ChartProvider chartProvider = ChartProvider()..initializeData();
 
       // When - 여러 번 연속으로 데이터 업데이트
-      final stopwatch = Stopwatch()..start();
+      final Stopwatch stopwatch = Stopwatch()..start();
 
       for (int i = 0; i < 100; i++) {
         chartProvider.updatePieData(

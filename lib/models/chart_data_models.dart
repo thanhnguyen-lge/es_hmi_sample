@@ -65,12 +65,6 @@ extension ChartTypeExtension on ChartType {
 
 /// 막대 그래프를 위한 데이터 모델
 class BarChartDataModel {
-  final String label;
-  final double baseUsage;
-  final double acUsage;
-  final double heatingUsage;
-  final double etcUsage;
-
   BarChartDataModel({
     required this.label,
     required this.baseUsage,
@@ -78,6 +72,22 @@ class BarChartDataModel {
     required this.heatingUsage,
     required this.etcUsage,
   });
+
+  /// JSON에서 생성
+  factory BarChartDataModel.fromJson(Map<String, dynamic> json) {
+    return BarChartDataModel(
+      label: json['label'] as String,
+      baseUsage: (json['baseUsage'] as num).toDouble(),
+      acUsage: (json['acUsage'] as num).toDouble(),
+      heatingUsage: (json['heatingUsage'] as num).toDouble(),
+      etcUsage: (json['etcUsage'] as num).toDouble(),
+    );
+  }
+  final String label;
+  final double baseUsage;
+  final double acUsage;
+  final double heatingUsage;
+  final double etcUsage;
 
   /// 총 사용량 계산
   double get totalUsage => baseUsage + acUsage + heatingUsage + etcUsage;
@@ -101,7 +111,7 @@ class BarChartDataModel {
 
   /// JSON으로 변환
   Map<String, dynamic> toJson() {
-    return {
+    return <String, dynamic>{
       'label': label,
       'baseUsage': baseUsage,
       'acUsage': acUsage,
@@ -109,30 +119,29 @@ class BarChartDataModel {
       'etcUsage': etcUsage,
     };
   }
-
-  /// JSON에서 생성
-  factory BarChartDataModel.fromJson(Map<String, dynamic> json) {
-    return BarChartDataModel(
-      label: json['label'] as String,
-      baseUsage: (json['baseUsage'] as num).toDouble(),
-      acUsage: (json['acUsage'] as num).toDouble(),
-      heatingUsage: (json['heatingUsage'] as num).toDouble(),
-      etcUsage: (json['etcUsage'] as num).toDouble(),
-    );
-  }
 }
 
 /// 라인 차트를 위한 데이터 포인트 모델
 class LineChartDataPoint {
-  final String label;
-  final double value;
-  final DateTime? timestamp;
-
   LineChartDataPoint({
     required this.label,
     required this.value,
     this.timestamp,
   });
+
+  /// JSON에서 생성
+  factory LineChartDataPoint.fromJson(Map<String, dynamic> json) {
+    return LineChartDataPoint(
+      label: json['label'] as String,
+      value: (json['value'] as num).toDouble(),
+      timestamp: json['timestamp'] != null
+          ? DateTime.parse(json['timestamp'] as String)
+          : null,
+    );
+  }
+  final String label;
+  final double value;
+  final DateTime? timestamp;
 
   /// 복사본 생성
   LineChartDataPoint copyWith({
@@ -149,33 +158,16 @@ class LineChartDataPoint {
 
   /// JSON으로 변환
   Map<String, dynamic> toJson() {
-    return {
+    return <String, dynamic>{
       'label': label,
       'value': value,
       'timestamp': timestamp?.toIso8601String(),
     };
   }
-
-  /// JSON에서 생성
-  factory LineChartDataPoint.fromJson(Map<String, dynamic> json) {
-    return LineChartDataPoint(
-      label: json['label'] as String,
-      value: (json['value'] as num).toDouble(),
-      timestamp: json['timestamp'] != null
-          ? DateTime.parse(json['timestamp'] as String)
-          : null,
-    );
-  }
 }
 
 /// 라인 차트를 위한 데이터 모델
 class LineChartDataModel {
-  final String seriesName;
-  final List<LineChartDataPoint> dataPoints;
-  final Color lineColor;
-  final double lineWidth;
-  final bool showDots;
-
   LineChartDataModel({
     required this.seriesName,
     required this.dataPoints,
@@ -184,15 +176,47 @@ class LineChartDataModel {
     this.showDots = true,
   });
 
+  /// JSON에서 생성
+  factory LineChartDataModel.fromJson(Map<String, dynamic> json) {
+    final Map<String, dynamic> colorData =
+        json['lineColor'] as Map<String, dynamic>;
+    final Color color = Color.fromARGB(
+      colorData['alpha'] as int,
+      colorData['red'] as int,
+      colorData['green'] as int,
+      colorData['blue'] as int,
+    );
+
+    return LineChartDataModel(
+      seriesName: json['seriesName'] as String,
+      dataPoints: (json['dataPoints'] as List<dynamic>)
+          .map((dynamic pointJson) =>
+              LineChartDataPoint.fromJson(pointJson as Map<String, dynamic>))
+          .toList(),
+      lineColor: color,
+      lineWidth: (json['lineWidth'] as num).toDouble(),
+      showDots: json['showDots'] as bool,
+    );
+  }
+  final String seriesName;
+  final List<LineChartDataPoint> dataPoints;
+  final Color lineColor;
+  final double lineWidth;
+  final bool showDots;
+
   /// 최대값 계산
   double get maxValue => dataPoints.isEmpty
       ? 0.0
-      : dataPoints.map((point) => point.value).reduce((a, b) => a > b ? a : b);
+      : dataPoints
+          .map((LineChartDataPoint point) => point.value)
+          .reduce((double a, double b) => a > b ? a : b);
 
   /// 최소값 계산
   double get minValue => dataPoints.isEmpty
       ? 0.0
-      : dataPoints.map((point) => point.value).reduce((a, b) => a < b ? a : b);
+      : dataPoints
+          .map((LineChartDataPoint point) => point.value)
+          .reduce((double a, double b) => a < b ? a : b);
 
   /// 복사본 생성
   LineChartDataModel copyWith({
@@ -213,10 +237,11 @@ class LineChartDataModel {
 
   /// JSON으로 변환
   Map<String, dynamic> toJson() {
-    return {
+    return <String, dynamic>{
       'seriesName': seriesName,
-      'dataPoints': dataPoints.map((point) => point.toJson()).toList(),
-      'lineColor': {
+      'dataPoints':
+          dataPoints.map((LineChartDataPoint point) => point.toJson()).toList(),
+      'lineColor': <String, double>{
         'red': lineColor.r,
         'green': lineColor.g,
         'blue': lineColor.b,
@@ -226,42 +251,30 @@ class LineChartDataModel {
       'showDots': showDots,
     };
   }
-
-  /// JSON에서 생성
-  factory LineChartDataModel.fromJson(Map<String, dynamic> json) {
-    final colorData = json['lineColor'] as Map<String, dynamic>;
-    final color = Color.fromARGB(
-      colorData['alpha'] as int,
-      colorData['red'] as int,
-      colorData['green'] as int,
-      colorData['blue'] as int,
-    );
-
-    return LineChartDataModel(
-      seriesName: json['seriesName'] as String,
-      dataPoints: (json['dataPoints'] as List)
-          .map((pointJson) => LineChartDataPoint.fromJson(pointJson))
-          .toList(),
-      lineColor: color,
-      lineWidth: (json['lineWidth'] as num).toDouble(),
-      showDots: json['showDots'] as bool,
-    );
-  }
 }
 
 /// 원형 그래프를 위한 데이터 모델
 class PieChartDataModel {
-  final double currentUsage;
-  final double totalCapacity;
-  final Color primaryColor;
-  final Color backgroundColor;
-
   PieChartDataModel({
     required this.currentUsage,
     required this.totalCapacity,
     required this.primaryColor,
     required this.backgroundColor,
   });
+
+  /// JSON에서 생성 (간단한 복원 - 기본 색상 사용)
+  factory PieChartDataModel.fromJson(Map<String, dynamic> json) {
+    return PieChartDataModel(
+      currentUsage: (json['currentUsage'] as num).toDouble(),
+      totalCapacity: (json['totalCapacity'] as num).toDouble(),
+      primaryColor: Colors.grey.shade600, // 기본값 사용
+      backgroundColor: Colors.grey.shade300, // 기본값 사용
+    );
+  }
+  final double currentUsage;
+  final double totalCapacity;
+  final Color primaryColor;
+  final Color backgroundColor;
 
   /// 사용률 퍼센티지 계산
   double get percentage =>
@@ -284,38 +297,27 @@ class PieChartDataModel {
 
   /// JSON으로 변환 (색상은 간단한 int 값으로)
   Map<String, dynamic> toJson() {
-    return {
+    return <String, dynamic>{
       'currentUsage': currentUsage,
       'totalCapacity': totalCapacity,
       'primaryColor': primaryColor.hashCode,
       'backgroundColor': backgroundColor.hashCode,
     };
   }
-
-  /// JSON에서 생성 (간단한 복원 - 기본 색상 사용)
-  factory PieChartDataModel.fromJson(Map<String, dynamic> json) {
-    return PieChartDataModel(
-      currentUsage: (json['currentUsage'] as num).toDouble(),
-      totalCapacity: (json['totalCapacity'] as num).toDouble(),
-      primaryColor: Colors.grey.shade600, // 기본값 사용
-      backgroundColor: Colors.grey.shade300, // 기본값 사용
-    );
-  }
 }
 
 /// 차트 색상 설정을 위한 모델
 class ChartColorScheme {
-  final Color baseUsageColor;
-  final Color acUsageColor;
-  final Color heatingUsageColor;
-  final Color etcUsageColor;
-
   const ChartColorScheme({
     required this.baseUsageColor,
     required this.acUsageColor,
     required this.heatingUsageColor,
     required this.etcUsageColor,
   });
+  final Color baseUsageColor;
+  final Color acUsageColor;
+  final Color heatingUsageColor;
+  final Color etcUsageColor;
 
   /// 기본 색상 스키마
   static const ChartColorScheme defaultScheme = ChartColorScheme(
@@ -326,7 +328,7 @@ class ChartColorScheme {
   );
 
   /// 색상 리스트 반환
-  List<Color> get colors => [
+  List<Color> get colors => <Color>[
         baseUsageColor,
         acUsageColor,
         heatingUsageColor,
@@ -351,9 +353,7 @@ class ChartColorScheme {
 
 /// 스택형 막대 차트를 위한 데이터 모델
 class StackedBarChartData {
-  final String category; // 카테고리 (예: 'Jan', 'Feb' 등)
-  final Map<String, double> values; // 각 스택 항목의 값 (key: 항목명, value: 사용량)
-  final Map<String, Color> colors; // 각 스택 항목의 색상 (key: 항목명, value: 색상)
+  // 각 스택 항목의 색상 (key: 항목명, value: 색상)
 
   const StackedBarChartData({
     required this.category,
@@ -361,19 +361,52 @@ class StackedBarChartData {
     required this.colors,
   });
 
+  /// 기본 생성자 (4개 카테고리용)
+  factory StackedBarChartData.fromUsageData({
+    required String category,
+    required double baseUsage,
+    required double acUsage,
+    required double heatingUsage,
+    required double etcUsage,
+    ChartColorScheme? colorScheme,
+  }) {
+    final ChartColorScheme scheme =
+        colorScheme ?? ChartColorScheme.defaultScheme;
+
+    return StackedBarChartData(
+      category: category,
+      values: <String, double>{
+        'Base': baseUsage,
+        'AC': acUsage,
+        'Heating': heatingUsage,
+        'Other': etcUsage,
+      },
+      colors: <String, Color>{
+        'Base': scheme.baseUsageColor,
+        'AC': scheme.acUsageColor,
+        'Heating': scheme.heatingUsageColor,
+        'Other': scheme.etcUsageColor,
+      },
+    );
+  }
+  final String category; // 카테고리 (예: 'Jan', 'Feb' 등)
+  final Map<String, double> values; // 각 스택 항목의 값 (key: 항목명, value: 사용량)
+  final Map<String, Color> colors;
+
   /// 총 사용량 계산
   double get totalUsage {
-    return values.values.fold(0.0, (sum, value) => sum + value);
+    return values.values.fold(0.0, (double sum, double value) => sum + value);
   }
 
   /// 각 항목의 백분율 계산
   Map<String, double> get percentages {
     if (totalUsage == 0) {
-      return Map.fromIterables(values.keys, List.filled(values.length, 0.0));
+      return Map<String, double>.fromIterables(
+          values.keys, List<double>.filled(values.length, 0.0));
     }
 
-    return values
-        .map((key, value) => MapEntry(key, (value / totalUsage) * 100));
+    return values.map((String key, double value) =>
+        MapEntry<String, double>(key, (value / totalUsage) * 100));
   }
 
   /// 특정 항목의 값 반환
@@ -385,34 +418,6 @@ class StackedBarChartData {
   /// 특정 항목의 백분율 반환
   double getPercentage(String key) => percentages[key] ?? 0.0;
 
-  /// 기본 생성자 (4개 카테고리용)
-  factory StackedBarChartData.fromUsageData({
-    required String category,
-    required double baseUsage,
-    required double acUsage,
-    required double heatingUsage,
-    required double etcUsage,
-    ChartColorScheme? colorScheme,
-  }) {
-    final scheme = colorScheme ?? ChartColorScheme.defaultScheme;
-
-    return StackedBarChartData(
-      category: category,
-      values: {
-        'Base': baseUsage,
-        'AC': acUsage,
-        'Heating': heatingUsage,
-        'Other': etcUsage,
-      },
-      colors: {
-        'Base': scheme.baseUsageColor,
-        'AC': scheme.acUsageColor,
-        'Heating': scheme.heatingUsageColor,
-        'Other': scheme.etcUsageColor,
-      },
-    );
-  }
-
   /// 복사본 생성
   StackedBarChartData copyWith({
     String? category,
@@ -421,8 +426,8 @@ class StackedBarChartData {
   }) {
     return StackedBarChartData(
       category: category ?? this.category,
-      values: values ?? Map.from(this.values),
-      colors: colors ?? Map.from(this.colors),
+      values: values ?? Map<String, double>.from(this.values),
+      colors: colors ?? Map<String, Color>.from(this.colors),
     );
   }
 
@@ -433,7 +438,9 @@ class StackedBarChartData {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
+    if (identical(this, other)) {
+      return true;
+    }
 
     return other is StackedBarChartData &&
         other.category == category &&
@@ -448,11 +455,17 @@ class StackedBarChartData {
 
   /// Map 비교 유틸리티
   bool _mapEquals<K, V>(Map<K, V>? map1, Map<K, V>? map2) {
-    if (map1 == null && map2 == null) return true;
-    if (map1 == null || map2 == null) return false;
-    if (map1.length != map2.length) return false;
+    if (map1 == null && map2 == null) {
+      return true;
+    }
+    if (map1 == null || map2 == null) {
+      return false;
+    }
+    if (map1.length != map2.length) {
+      return false;
+    }
 
-    for (var key in map1.keys) {
+    for (final dynamic key in map1.keys) {
       if (!map2.containsKey(key) || map1[key] != map2[key]) {
         return false;
       }

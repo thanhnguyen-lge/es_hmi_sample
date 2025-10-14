@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/material.dart';
+
 import '../models/chart_data_models.dart';
 
 /// 반쪽 도넛 차트 위젯
@@ -7,15 +8,6 @@ import '../models/chart_data_models.dart';
 /// fl_chart 라이브러리를 사용하여 반원형 도넛 차트를 표시합니다.
 /// 게이지나 진행률 표시에 적합한 디자인입니다.
 class HalfDonutChart extends StatefulWidget {
-  final PieChartDataModel data;
-  final String title;
-  final String centerText;
-  final bool showPercentage;
-  final bool showValues;
-  final bool enableInteraction;
-  final Duration animationDuration;
-  final EdgeInsets? margin;
-
   const HalfDonutChart({
     super.key,
     required this.data,
@@ -27,6 +19,14 @@ class HalfDonutChart extends StatefulWidget {
     this.animationDuration = const Duration(milliseconds: 1000),
     this.margin,
   });
+  final PieChartDataModel data;
+  final String title;
+  final String centerText;
+  final bool showPercentage;
+  final bool showValues;
+  final bool enableInteraction;
+  final Duration animationDuration;
+  final EdgeInsets? margin;
 
   @override
   State<HalfDonutChart> createState() => _HalfDonutChartState();
@@ -63,10 +63,9 @@ class _HalfDonutChartState extends State<HalfDonutChart>
     return Container(
       margin: widget.margin ?? const EdgeInsets.all(16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        children: <Widget>[
           // 제목
-          if (widget.title.isNotEmpty) ...[
+          if (widget.title.isNotEmpty) ...<Widget>[
             Padding(
               padding: const EdgeInsets.only(bottom: 16.0),
               child: Text(
@@ -79,7 +78,12 @@ class _HalfDonutChartState extends State<HalfDonutChart>
           ],
 
           // 차트 영역
-          Expanded(
+          // Expanded(
+          //   child: _buildChartArea(),
+          // ),
+          Container(
+            alignment: Alignment.center,
+            height: 300,
             child: _buildChartArea(),
           ),
 
@@ -93,14 +97,14 @@ class _HalfDonutChartState extends State<HalfDonutChart>
   /// 차트 영역 빌드
   Widget _buildChartArea() {
     return Stack(
-      children: [
+      children: <Widget>[
         // 반쪽 도넛 차트
         AnimatedBuilder(
           animation: _animation,
-          builder: (context, child) {
+          builder: (BuildContext context, Widget? child) {
             return PieChart(
               PieChartData(
-                startDegreeOffset: 180, // 하단에서 시작하여 위쪽으로
+                startDegreeOffset: 180,
                 sectionsSpace: 0,
                 centerSpaceRadius: 80,
                 sections: _buildPieChartSections(),
@@ -120,15 +124,15 @@ class _HalfDonutChartState extends State<HalfDonutChart>
 
   /// 파이 차트 섹션 생성
   List<PieChartSectionData> _buildPieChartSections() {
-    final animatedPercentage = widget.data.percentage * _animation.value;
+    final double animatedPercentage = widget.data.percentage * _animation.value;
 
     // 사용자가 제공한 예제와 동일한 방식
     // 전체를 60으로 나누고, 30을 투명하게 하여 반원 효과
-    final usageRatio = animatedPercentage / 100.0;
-    final usageValue = usageRatio * 30; // 상단 반원의 사용량 부분
-    final remainingValue = (1.0 - usageRatio) * 30; // 상단 반원의 남은 부분
+    final double usageRatio = animatedPercentage / 100.0;
+    final double usageValue = usageRatio * 30; // 상단 반원의 사용량 부분
+    final double remainingValue = (1.0 - usageRatio) * 30; // 상단 반원의 남은 부분
 
-    return [
+    return <PieChartSectionData>[
       // 사용량 섹션
       PieChartSectionData(
         color: widget.data.primaryColor,
@@ -142,7 +146,7 @@ class _HalfDonutChartState extends State<HalfDonutChart>
           fontSize: 16,
           fontWeight: FontWeight.bold,
           color: Colors.white,
-          shadows: [
+          shadows: <Shadow>[
             Shadow(color: Colors.black26, blurRadius: 2),
           ],
         ),
@@ -169,7 +173,7 @@ class _HalfDonutChartState extends State<HalfDonutChart>
         color: Colors.transparent,
         value: 30, // 하단 반원 전체를 투명하게
         title: '',
-        radius: 60,
+        radius: 0,
         showTitle: false,
       ),
     ];
@@ -179,7 +183,7 @@ class _HalfDonutChartState extends State<HalfDonutChart>
   PieTouchData _buildPieChartTouchData() {
     return PieTouchData(
       enabled: widget.enableInteraction,
-      touchCallback: (FlTouchEvent event, pieTouchResponse) {
+      touchCallback: (FlTouchEvent event, PieTouchResponse? pieTouchResponse) {
         setState(() {
           if (!event.isInterestedForInteractions ||
               pieTouchResponse == null ||
@@ -198,7 +202,7 @@ class _HalfDonutChartState extends State<HalfDonutChart>
     return Positioned.fill(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+        children: <Widget>[
           const SizedBox(height: 60), // 반원이므로 텍스트를 더 아래로 이동
           Text(
             widget.centerText,
@@ -211,8 +215,8 @@ class _HalfDonutChartState extends State<HalfDonutChart>
           const SizedBox(height: 8),
           AnimatedBuilder(
             animation: _animation,
-            builder: (context, child) {
-              final animatedCurrentUsage =
+            builder: (BuildContext context, Widget? child) {
+              final double animatedCurrentUsage =
                   widget.data.currentUsage * _animation.value;
               return Text(
                 animatedCurrentUsage.toStringAsFixed(1),
@@ -226,8 +230,8 @@ class _HalfDonutChartState extends State<HalfDonutChart>
           ),
           AnimatedBuilder(
             animation: _animation,
-            builder: (context, child) {
-              final animatedTotalCapacity =
+            builder: (BuildContext context, Widget? child) {
+              final double animatedTotalCapacity =
                   widget.data.totalCapacity * _animation.value;
               return Text(
                 '/ ${animatedTotalCapacity.toStringAsFixed(1)}',
@@ -256,7 +260,7 @@ class _HalfDonutChartState extends State<HalfDonutChart>
       padding: const EdgeInsets.only(top: 16.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
+        children: <Widget>[
           _buildLegendItem(
             label: '현재 사용량',
             color: widget.data.primaryColor,
@@ -283,10 +287,10 @@ class _HalfDonutChartState extends State<HalfDonutChart>
     String? value,
   }) {
     return Column(
-      children: [
+      children: <Widget>[
         Row(
           mainAxisSize: MainAxisSize.min,
-          children: [
+          children: <Widget>[
             Container(
               width: 16,
               height: 16,
@@ -306,7 +310,7 @@ class _HalfDonutChartState extends State<HalfDonutChart>
             ),
           ],
         ),
-        if (value != null) ...[
+        if (value != null) ...<Widget>[
           const SizedBox(height: 4),
           Text(
             value,

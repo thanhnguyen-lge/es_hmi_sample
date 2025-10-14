@@ -1,14 +1,14 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:chart_sample_app/models/chart_data_models.dart';
 import 'package:chart_sample_app/widgets/stacked_bar_chart.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('StackedBarChart Widget Tests', () {
     late List<StackedBarChartData> testData;
 
     setUp(() {
-      testData = [
+      testData = <StackedBarChartData>[
         StackedBarChartData.fromUsageData(
           category: 'Jan',
           baseUsage: 45.0,
@@ -36,9 +36,9 @@ void main() {
     testWidgets('StackedBarChart는 올바르게 렌더링되어야 합니다',
         (WidgetTester tester) async {
       // Given
-      const title = '월별 에너지 사용량';
-      const xAxisTitle = '월';
-      const yAxisTitle = '사용량 (kWh)';
+      const String title = '월별 에너지 사용량';
+      const String xAxisTitle = '월';
+      const String yAxisTitle = '사용량 (kWh)';
 
       // When
       await tester.pumpWidget(
@@ -61,7 +61,7 @@ void main() {
 
     testWidgets('StackedBarChart는 제목을 표시해야 합니다', (WidgetTester tester) async {
       // Given
-      const title = '테스트 차트 제목';
+      const String title = '테스트 차트 제목';
 
       // When
       await tester.pumpWidget(
@@ -91,7 +91,6 @@ void main() {
               title: '테스트 차트',
               xAxisTitle: 'X축',
               yAxisTitle: 'Y축',
-              showLegend: true,
             ),
           ),
         ),
@@ -132,10 +131,10 @@ void main() {
         (WidgetTester tester) async {
       // When
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: StackedBarChart(
-              data: const [],
+              data: <StackedBarChartData>[],
               title: '빈 차트',
               xAxisTitle: 'X축',
               yAxisTitle: 'Y축',
@@ -152,7 +151,7 @@ void main() {
     testWidgets('StackedBarChart는 사용자 정의 애니메이션 지속시간을 가질 수 있어야 합니다',
         (WidgetTester tester) async {
       // Given
-      const customDuration = Duration(milliseconds: 500);
+      const Duration customDuration = Duration(milliseconds: 500);
 
       // When
       await tester.pumpWidget(
@@ -176,7 +175,7 @@ void main() {
     testWidgets('StackedBarChart는 최대 Y값을 설정할 수 있어야 합니다',
         (WidgetTester tester) async {
       // Given
-      const maxY = 200.0;
+      const double maxY = 200.0;
 
       // When
       await tester.pumpWidget(
@@ -242,7 +241,7 @@ void main() {
     testWidgets('StackedBarChart는 사용자 정의 여백을 가질 수 있어야 합니다',
         (WidgetTester tester) async {
       // Given
-      const customMargin = EdgeInsets.all(24);
+      const EdgeInsets customMargin = EdgeInsets.all(24);
 
       // When
       await tester.pumpWidget(
@@ -325,7 +324,7 @@ void main() {
     group('StackedBarChart 데이터 처리', () {
       testWidgets('차트는 단일 데이터 포인트를 처리할 수 있어야 합니다', (WidgetTester tester) async {
         // Given
-        final singleDataPoint = [
+        final List<StackedBarChartData> singleDataPoint = <StackedBarChartData>[
           StackedBarChartData.fromUsageData(
             category: 'Single',
             baseUsage: 30.0,
@@ -356,9 +355,10 @@ void main() {
 
       testWidgets('차트는 대용량 데이터를 처리할 수 있어야 합니다', (WidgetTester tester) async {
         // Given
-        final largeDataSet = List.generate(
+        final List<StackedBarChartData> largeDataSet =
+            List<StackedBarChartData>.generate(
           12,
-          (index) => StackedBarChartData.fromUsageData(
+          (int index) => StackedBarChartData.fromUsageData(
             category: 'Month${index + 1}',
             baseUsage: 40.0 + (index * 2),
             acUsage: 10.0 + (index * 1.5),

@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/material.dart';
+
 import '../models/chart_data_models.dart';
 
 /// 스택형 막대 차트 위젯
@@ -7,17 +8,6 @@ import '../models/chart_data_models.dart';
 /// fl_chart 라이브러리를 사용하여 4개 카테고리(Base, AC, Heating, Other)의
 /// 에너지 사용량을 스택형 막대 차트로 표시합니다.
 class StackedBarChart extends StatefulWidget {
-  final List<StackedBarChartData> data;
-  final String title;
-  final String xAxisTitle;
-  final String yAxisTitle;
-  final double? maxY;
-  final bool showLegend;
-  final bool showTooltip;
-  final bool enableInteraction;
-  final EdgeInsets? margin;
-  final Duration animationDuration;
-
   const StackedBarChart({
     super.key,
     required this.data,
@@ -31,6 +21,16 @@ class StackedBarChart extends StatefulWidget {
     this.margin,
     this.animationDuration = const Duration(milliseconds: 800),
   });
+  final List<StackedBarChartData> data;
+  final String title;
+  final String xAxisTitle;
+  final String yAxisTitle;
+  final double? maxY;
+  final bool showLegend;
+  final bool showTooltip;
+  final bool enableInteraction;
+  final EdgeInsets? margin;
+  final Duration animationDuration;
 
   @override
   State<StackedBarChart> createState() => _StackedBarChartState();
@@ -68,7 +68,7 @@ class _StackedBarChartState extends State<StackedBarChart>
       margin: widget.margin ?? const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        children: <Widget>[
           // 제목
           Padding(
             padding: const EdgeInsets.only(bottom: 16.0),
@@ -84,7 +84,7 @@ class _StackedBarChartState extends State<StackedBarChart>
           Expanded(
             child: AnimatedBuilder(
               animation: _animation,
-              builder: (context, child) {
+              builder: (BuildContext context, Widget? child) {
                 return BarChart(
                   BarChartData(
                     alignment: BarChartAlignment.spaceAround,
@@ -98,10 +98,9 @@ class _StackedBarChartState extends State<StackedBarChart>
                       border: Border.all(color: Colors.grey.shade300),
                     ),
                     gridData: FlGridData(
-                      show: true,
                       drawVerticalLine: false,
                       horizontalInterval: (widget.maxY ?? _calculateMaxY()) / 5,
-                      getDrawingHorizontalLine: (value) {
+                      getDrawingHorizontalLine: (double value) {
                         return FlLine(
                           color: Colors.grey.shade300,
                           strokeWidth: 1,
@@ -116,7 +115,7 @@ class _StackedBarChartState extends State<StackedBarChart>
           ),
 
           // 범례
-          if (widget.showLegend) ...[
+          if (widget.showLegend) ...<Widget>[
             const SizedBox(height: 16),
             _buildLegend(),
           ],
@@ -131,16 +130,18 @@ class _StackedBarChartState extends State<StackedBarChart>
       enabled: widget.enableInteraction,
       touchTooltipData: widget.showTooltip
           ? BarTouchTooltipData(
-              getTooltipColor: (touchedSpot) => Colors.blueGrey.shade700,
+              getTooltipColor: (BarChartGroupData touchedSpot) =>
+                  Colors.blueGrey.shade700,
               tooltipRoundedRadius: 8,
               tooltipPadding: const EdgeInsets.all(8),
               tooltipMargin: 8,
-              getTooltipItem: (group, groupIndex, rod, rodIndex) {
+              getTooltipItem: (BarChartGroupData group, int groupIndex,
+                  BarChartRodData rod, int rodIndex) {
                 return _buildTooltipItem(group, groupIndex, rod, rodIndex);
               },
             )
           : null,
-      touchCallback: (FlTouchEvent event, barTouchResponse) {
+      touchCallback: (FlTouchEvent event, BarTouchResponse? barTouchResponse) {
         setState(() {
           if (!event.isInterestedForInteractions ||
               barTouchResponse == null ||
@@ -157,18 +158,20 @@ class _StackedBarChartState extends State<StackedBarChart>
   /// 툴팁 아이템 생성
   BarTooltipItem? _buildTooltipItem(BarChartGroupData group, int groupIndex,
       BarChartRodData rod, int rodIndex) {
-    if (groupIndex >= widget.data.length) return null;
+    if (groupIndex >= widget.data.length) {
+      return null;
+    }
 
-    final data = widget.data[groupIndex];
+    final StackedBarChartData data = widget.data[groupIndex];
     final StringBuffer tooltip = StringBuffer();
 
     tooltip.writeln(data.category);
     tooltip.writeln('총 사용량: ${data.totalUsage.toStringAsFixed(1)}kWh');
-    tooltip.writeln('');
+    tooltip.writeln();
 
     // 각 스택 아이템 정보 추가
-    data.values.forEach((key, value) {
-      final percentage = data.getPercentage(key);
+    data.values.forEach((String key, double value) {
+      final double percentage = data.getPercentage(key);
       tooltip.writeln(
           '$key: ${value.toStringAsFixed(1)}kWh (${percentage.toStringAsFixed(1)}%)');
     });
@@ -186,9 +189,8 @@ class _StackedBarChartState extends State<StackedBarChart>
   /// 축 제목 및 라벨 설정
   FlTitlesData _buildTitlesData() {
     return FlTitlesData(
-      show: true,
-      rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-      topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+      rightTitles: const AxisTitles(),
+      topTitles: const AxisTitles(),
       bottomTitles: AxisTitles(
         axisNameWidget: Padding(
           padding: const EdgeInsets.only(top: 8.0),
@@ -202,8 +204,8 @@ class _StackedBarChartState extends State<StackedBarChart>
         ),
         sideTitles: SideTitles(
           showTitles: true,
-          getTitlesWidget: (value, meta) {
-            final index = value.toInt();
+          getTitlesWidget: (double value, TitleMeta meta) {
+            final int index = value.toInt();
             if (index >= 0 && index < widget.data.length) {
               return Padding(
                 padding: const EdgeInsets.only(top: 4.0),
@@ -235,7 +237,7 @@ class _StackedBarChartState extends State<StackedBarChart>
         sideTitles: SideTitles(
           showTitles: true,
           interval: (widget.maxY ?? _calculateMaxY()) / 5,
-          getTitlesWidget: (value, meta) {
+          getTitlesWidget: (double value, TitleMeta meta) {
             return Text(
               value.toInt().toString(),
               style: const TextStyle(
@@ -252,14 +254,17 @@ class _StackedBarChartState extends State<StackedBarChart>
 
   /// 막대 그룹 생성
   List<BarChartGroupData> _createBarGroups() {
-    return widget.data.asMap().entries.map((entry) {
+    return widget.data
+        .asMap()
+        .entries
+        .map((MapEntry<int, StackedBarChartData> entry) {
       final int index = entry.key;
       final StackedBarChartData item = entry.value;
       final bool isTouched = index == _touchedGroupIndex;
 
       return BarChartGroupData(
         x: index,
-        barRods: [
+        barRods: <BarChartRodData>[
           BarChartRodData(
             toY: item.totalUsage * _animation.value,
             rodStackItems: _createStackItems(item),
@@ -272,20 +277,20 @@ class _StackedBarChartState extends State<StackedBarChart>
             ),
           ),
         ],
-        showingTooltipIndicators: isTouched ? [0] : [],
+        showingTooltipIndicators: isTouched ? <int>[0] : <int>[],
       );
     }).toList();
   }
 
   /// 스택 아이템 생성
   List<BarChartRodStackItem> _createStackItems(StackedBarChartData item) {
-    final List<BarChartRodStackItem> stackItems = [];
+    final List<BarChartRodStackItem> stackItems = <BarChartRodStackItem>[];
     double cumulativeSum = 0;
 
     // 스택 순서 정의 (아래에서 위로)
-    final List<String> stackOrder = ['Base', 'AC', 'Heating', 'Other'];
+    final List<String> stackOrder = <String>['Base', 'AC', 'Heating', 'Other'];
 
-    for (String key in stackOrder) {
+    for (final String key in stackOrder) {
       if (item.values.containsKey(key)) {
         final double value = item.getValue(key);
         final Color color = item.getColor(key);
@@ -306,11 +311,13 @@ class _StackedBarChartState extends State<StackedBarChart>
 
   /// 최대 Y값 계산
   double _calculateMaxY() {
-    if (widget.data.isEmpty) return 100;
+    if (widget.data.isEmpty) {
+      return 100;
+    }
 
-    final maxUsage = widget.data
-        .map((item) => item.totalUsage)
-        .reduce((max, current) => current > max ? current : max);
+    final double maxUsage = widget.data
+        .map((StackedBarChartData item) => item.totalUsage)
+        .reduce((double max, double current) => current > max ? current : max);
 
     // 여유를 두기 위해 10% 추가
     return (maxUsage * 1.1).ceilToDouble();
@@ -319,26 +326,31 @@ class _StackedBarChartState extends State<StackedBarChart>
   /// 범례 생성
   Widget _buildLegend() {
     // 모든 데이터에서 고유한 카테고리 추출
-    final Set<String> categories = {};
-    final Map<String, Color> categoryColors = {};
+    final Set<String> categories = <String>{};
+    final Map<String, Color> categoryColors = <String, Color>{};
 
-    for (var item in widget.data) {
+    for (final StackedBarChartData item in widget.data) {
       categories.addAll(item.values.keys);
       categoryColors.addAll(item.colors);
     }
 
     // 정해진 순서로 정렬
-    final List<String> orderedCategories = ['Base', 'AC', 'Heating', 'Other'];
+    final List<String> orderedCategories = <String>[
+      'Base',
+      'AC',
+      'Heating',
+      'Other'
+    ];
     final List<String> displayCategories = orderedCategories
-        .where((category) => categories.contains(category))
+        .where((String category) => categories.contains(category))
         .toList();
 
     return Wrap(
       spacing: 16,
       runSpacing: 8,
       alignment: WrapAlignment.center,
-      children: displayCategories.map((category) {
-        final color = categoryColors[category] ?? Colors.grey;
+      children: displayCategories.map((String category) {
+        final Color color = categoryColors[category] ?? Colors.grey;
         return _buildLegendItem(category, color);
       }).toList(),
     );
@@ -348,7 +360,7 @@ class _StackedBarChartState extends State<StackedBarChart>
   Widget _buildLegendItem(String label, Color color) {
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: [
+      children: <Widget>[
         Container(
           width: 16,
           height: 16,

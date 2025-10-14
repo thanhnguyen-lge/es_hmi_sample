@@ -1,7 +1,7 @@
+import 'package:chart_sample_app/models/chart_data_models.dart';
+import 'package:chart_sample_app/providers/chart_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chart_sample_app/providers/chart_provider.dart';
-import 'package:chart_sample_app/models/chart_data_models.dart';
 
 void main() {
   group('ChartProvider Tests', () {
@@ -22,10 +22,10 @@ void main() {
       });
 
       test('초기 막대 그래프 데이터가 유효해야 함', () {
-        final barData = provider.barChartData;
+        final List<BarChartDataModel> barData = provider.barChartData;
         expect(barData.length, 7);
 
-        for (final data in barData) {
+        for (final BarChartDataModel data in barData) {
           expect(data.baseUsage, greaterThanOrEqualTo(0));
           expect(data.acUsage, greaterThanOrEqualTo(0));
           expect(data.heatingUsage, greaterThanOrEqualTo(0));
@@ -35,7 +35,7 @@ void main() {
       });
 
       test('초기 원형 그래프 데이터가 유효해야 함', () {
-        final pieData = provider.pieChartData;
+        final PieChartDataModel pieData = provider.pieChartData;
         expect(pieData.currentUsage, greaterThanOrEqualTo(0));
         expect(pieData.totalCapacity, greaterThan(0));
         expect(pieData.percentage, greaterThanOrEqualTo(0));
@@ -45,19 +45,20 @@ void main() {
 
     group('막대 그래프 데이터 업데이트 테스트', () {
       test('유효한 인덱스로 막대 데이터 카테고리 업데이트', () {
-        const testIndex = 0;
-        const testValue = 50.0;
-        const testCategory = 'baseUsage';
+        const int testIndex = 0;
+        const double testValue = 50.0;
+        const String testCategory = 'baseUsage';
 
         provider.updateBarDataCategory(testIndex, testCategory, testValue);
 
-        final updatedData = provider.barChartData[testIndex];
+        final BarChartDataModel updatedData = provider.barChartData[testIndex];
         // baseUsage가 업데이트되었는지 확인
         expect(updatedData.baseUsage, testValue);
       });
 
       test('잘못된 인덱스로 막대 데이터 업데이트 시 무시', () {
-        final originalData = List.from(provider.barChartData);
+        final List<BarChartDataModel> originalData =
+            List<BarChartDataModel>.from(provider.barChartData);
 
         provider.updateBarDataCategory(-1, 'Invalid', 50.0);
         provider.updateBarDataCategory(999, 'Invalid', 50.0);
@@ -66,7 +67,7 @@ void main() {
       });
 
       test('음수 값으로 막대 데이터 업데이트 시 무시', () {
-        final originalData = provider.barChartData[0];
+        final BarChartDataModel originalData = provider.barChartData[0];
 
         provider.updateBarDataCategory(0, 'Test', -10.0);
 
@@ -74,8 +75,8 @@ void main() {
       });
 
       test('막대 데이터 개별 카테고리 업데이트', () {
-        const testIndex = 2;
-        const testValue = 75.0;
+        const int testIndex = 2;
+        const double testValue = 75.0;
 
         provider.updateBarData(testIndex, baseUsage: testValue);
 
@@ -83,7 +84,7 @@ void main() {
       });
 
       test('막대 데이터 전체 카테고리 업데이트', () {
-        const testIndex = 1;
+        const int testIndex = 1;
 
         provider.updateBarData(
           testIndex,
@@ -93,7 +94,7 @@ void main() {
           etcUsage: 40.0,
         );
 
-        final updatedData = provider.barChartData[testIndex];
+        final BarChartDataModel updatedData = provider.barChartData[testIndex];
         expect(updatedData.baseUsage, 10.0);
         expect(updatedData.acUsage, 20.0);
         expect(updatedData.heatingUsage, 30.0);
@@ -103,7 +104,7 @@ void main() {
 
     group('원형 그래프 데이터 업데이트 테스트', () {
       test('유효한 현재 사용량 업데이트', () {
-        const testUsage = 75.0;
+        const double testUsage = 75.0;
 
         provider.updatePieCurrentUsage(testUsage);
 
@@ -114,7 +115,7 @@ void main() {
       });
 
       test('음수 현재 사용량 업데이트 시 무시', () {
-        final originalUsage = provider.pieChartData.currentUsage;
+        final double originalUsage = provider.pieChartData.currentUsage;
 
         provider.updatePieCurrentUsage(-10.0);
 
@@ -122,8 +123,8 @@ void main() {
       });
 
       test('총 용량을 초과하는 현재 사용량 업데이트 시 무시', () {
-        final originalUsage = provider.pieChartData.currentUsage;
-        final totalCapacity = provider.pieChartData.totalCapacity;
+        final double originalUsage = provider.pieChartData.currentUsage;
+        final double totalCapacity = provider.pieChartData.totalCapacity;
 
         provider.updatePieCurrentUsage(totalCapacity + 10);
 
@@ -131,8 +132,8 @@ void main() {
       });
 
       test('유효한 총 용량 업데이트', () {
-        const testCapacity = 200.0;
-        final originalUsage = provider.pieChartData.currentUsage;
+        const double testCapacity = 200.0;
+        final double originalUsage = provider.pieChartData.currentUsage;
 
         provider.updatePieTotalCapacity(testCapacity);
 
@@ -141,7 +142,7 @@ void main() {
       });
 
       test('0 이하의 총 용량 업데이트 시 무시', () {
-        final originalCapacity = provider.pieChartData.totalCapacity;
+        final double originalCapacity = provider.pieChartData.totalCapacity;
 
         provider.updatePieTotalCapacity(0);
         provider.updatePieTotalCapacity(-10);
@@ -150,8 +151,8 @@ void main() {
       });
 
       test('전체 원형 데이터 업데이트', () {
-        const testUsage = 80.0;
-        const testCapacity = 150.0;
+        const double testUsage = 80.0;
+        const double testCapacity = 150.0;
 
         provider.updatePieData(
           currentUsage: testUsage,
@@ -194,11 +195,11 @@ void main() {
 
     group('색상 스키마 테스트', () {
       test('색상 스키마 업데이트', () {
-        final newColorScheme = ChartColorScheme(
-          baseUsageColor: const Color(0xFF111111),
-          acUsageColor: const Color(0xFF222222),
-          heatingUsageColor: const Color(0xFF333333),
-          etcUsageColor: const Color(0xFF444444),
+        const ChartColorScheme newColorScheme = ChartColorScheme(
+          baseUsageColor: Color(0xFF111111),
+          acUsageColor: Color(0xFF222222),
+          heatingUsageColor: Color(0xFF333333),
+          etcUsageColor: Color(0xFF444444),
         );
 
         provider.updateColorScheme(newColorScheme);
@@ -213,7 +214,7 @@ void main() {
       });
 
       test('개별 색상 업데이트', () {
-        const newBaseColor = Color(0xFF999999);
+        const Color newBaseColor = Color(0xFF999999);
 
         provider.updateColor('base', newBaseColor);
 
@@ -221,7 +222,7 @@ void main() {
       });
 
       test('잘못된 색상 타입으로 개별 색상 업데이트 시 무시', () {
-        final originalColorScheme = provider.colorScheme;
+        final ChartColorScheme originalColorScheme = provider.colorScheme;
 
         provider.updateColor('invalid', const Color(0xFF999999));
 
@@ -255,7 +256,9 @@ void main() {
         provider.resetToEmpty();
 
         expect(provider.barChartData.length, 7); // 7일간의 빈 데이터
-        expect(provider.barChartData.every((data) => data.totalUsage == 0),
+        expect(
+            provider.barChartData
+                .every((BarChartDataModel data) => data.totalUsage == 0),
             true); // 모든 사용량이 0
         expect(provider.pieChartData.currentUsage, 0);
         expect(provider.pieChartData.totalCapacity, 100.0);
@@ -278,9 +281,9 @@ void main() {
         provider.updateBarData(2,
             baseUsage: 30.0, acUsage: 45.0, heatingUsage: 0, etcUsage: 0);
 
-        final maxValue = provider.barChartData
-            .map((data) => data.totalUsage)
-            .reduce((a, b) => a > b ? a : b);
+        final double maxValue = provider.barChartData
+            .map((BarChartDataModel data) => data.totalUsage)
+            .reduce((double a, double b) => a > b ? a : b);
         expect(maxValue, 100.0);
       });
 
@@ -294,7 +297,7 @@ void main() {
 
     group('상태 변경 알림 테스트', () {
       test('데이터 변경 시 리스너에 알림', () {
-        var notified = false;
+        bool notified = false;
         provider.addListener(() {
           notified = true;
         });
@@ -305,7 +308,7 @@ void main() {
       });
 
       test('차트 타입 변경 시 리스너에 알림', () {
-        var notified = false;
+        bool notified = false;
         provider.addListener(() {
           notified = true;
         });
@@ -346,9 +349,10 @@ void main() {
       });
 
       test('스택형 차트 데이터 각 항목이 유효해야 함', () {
-        final stackedData = provider.stackedBarChartData;
+        final List<StackedBarChartData> stackedData =
+            provider.stackedBarChartData;
 
-        for (final data in stackedData) {
+        for (final StackedBarChartData data in stackedData) {
           expect(data.category, isNotEmpty);
           expect(data.totalUsage, greaterThan(0));
           expect(data.values, isNotEmpty);
@@ -361,15 +365,15 @@ void main() {
           expect(data.getValue('Other'), greaterThanOrEqualTo(0));
 
           // 백분율 계산이 올바른지 확인
-          final percentages = data.percentages;
-          final totalPercentage =
-              percentages.values.fold(0.0, (sum, pct) => sum + pct);
+          final Map<String, double> percentages = data.percentages;
+          final double totalPercentage = percentages.values
+              .fold(0.0, (double sum, double pct) => sum + pct);
           expect(totalPercentage, closeTo(100.0, 0.01));
         }
       });
 
       test('스택형 차트 데이터 업데이트', () {
-        final newData = [
+        final List<StackedBarChartData> newData = <StackedBarChartData>[
           StackedBarChartData.fromUsageData(
             category: 'Test1',
             baseUsage: 30.0,
@@ -396,9 +400,9 @@ void main() {
       });
 
       test('스택형 차트 데이터 추가', () {
-        final initialCount = provider.stackedBarChartData.length;
+        final int initialCount = provider.stackedBarChartData.length;
 
-        final newItem = StackedBarChartData.fromUsageData(
+        final StackedBarChartData newItem = StackedBarChartData.fromUsageData(
           category: 'NewMonth',
           baseUsage: 40.0,
           acUsage: 30.0,
@@ -414,10 +418,10 @@ void main() {
       });
 
       test('스택형 차트 데이터 제거', () {
-        final initialCount = provider.stackedBarChartData.length;
+        final int initialCount = provider.stackedBarChartData.length;
         expect(initialCount, greaterThan(0));
 
-        final firstCategory = provider.stackedBarChartData[0].category;
+        final String firstCategory = provider.stackedBarChartData[0].category;
         provider.removeStackedBarChartData(0);
 
         expect(provider.stackedBarChartData.length, initialCount - 1);
@@ -430,7 +434,7 @@ void main() {
       });
 
       test('잘못된 인덱스로 스택형 차트 데이터 제거 시도', () {
-        final initialCount = provider.stackedBarChartData.length;
+        final int initialCount = provider.stackedBarChartData.length;
 
         // 음수 인덱스
         provider.removeStackedBarChartData(-1);
@@ -442,19 +446,19 @@ void main() {
       });
 
       test('최대 스택형 차트 값 계산', () {
-        final maxValue = provider.maxStackedBarChartValue;
+        final double maxValue = provider.maxStackedBarChartValue;
 
         // 실제 데이터에서 최대값을 직접 계산
-        final actualMax = provider.stackedBarChartData
-            .map((item) => item.totalUsage)
-            .reduce((a, b) => a > b ? a : b);
+        final double actualMax = provider.stackedBarChartData
+            .map((StackedBarChartData item) => item.totalUsage)
+            .reduce((double a, double b) => a > b ? a : b);
 
         expect(maxValue, actualMax);
         expect(maxValue, greaterThan(0));
       });
 
       test('빈 스택형 차트 데이터에서 최대값 계산', () {
-        provider.updateStackedBarChartData([]);
+        provider.updateStackedBarChartData(<StackedBarChartData>[]);
         expect(provider.maxStackedBarChartValue, 100.0); // 기본값
       });
 
