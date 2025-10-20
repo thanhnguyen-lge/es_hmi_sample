@@ -217,6 +217,7 @@ class ChartProvider extends ChangeNotifier {
         _currentChartType = ChartType.halfDonut;
       case ChartType.halfDonut:
         _currentChartType = ChartType.bar;
+      default: // do nothing
     }
     notifyListeners();
 

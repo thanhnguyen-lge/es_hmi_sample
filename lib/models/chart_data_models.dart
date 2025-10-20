@@ -8,6 +8,9 @@ enum ChartType {
   stackedBar, // 스택형 막대 차트
   donut, // 도넛 차트
   halfDonut, // 반쪽 도넛 차트
+  lineOutDoorTemp,
+  lineSetTemp,
+  clusterStackBar,
 }
 
 extension ChartTypeExtension on ChartType {
@@ -25,6 +28,12 @@ extension ChartTypeExtension on ChartType {
         return '도넛 그래프';
       case ChartType.halfDonut:
         return '반쪽 도넛 그래프';
+      case ChartType.lineOutDoorTemp:
+        return 'Line chart outdoor temp';
+      case ChartType.lineSetTemp:
+        return 'Line chart set temp';
+      case ChartType.clusterStackBar:
+        return 'Cluster Stacked Bar chart';
     }
   }
 
@@ -42,6 +51,11 @@ extension ChartTypeExtension on ChartType {
         return Icons.donut_large;
       case ChartType.halfDonut:
         return Icons.donut_small;
+      case ChartType.lineOutDoorTemp:
+      case ChartType.lineSetTemp:
+        return Icons.show_chart;
+      case ChartType.clusterStackBar:
+        return Icons.stacked_bar_chart;
     }
   }
 
@@ -59,6 +73,12 @@ extension ChartTypeExtension on ChartType {
         return Colors.teal;
       case ChartType.halfDonut:
         return Colors.indigo;
+      case ChartType.lineOutDoorTemp:
+        return Colors.orange;
+      case ChartType.lineSetTemp:
+        return Colors.orange; 
+      case ChartType.clusterStackBar:
+        return Colors.purple;
     }
   }
 }

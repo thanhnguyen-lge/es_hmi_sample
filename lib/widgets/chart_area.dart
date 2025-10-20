@@ -4,8 +4,11 @@ import 'package:provider/provider.dart';
 
 import '../models/chart_data_models.dart';
 import '../providers/chart_provider.dart';
+import 'clustered_stacked_bar_chart.dart';
 import 'donut_chart.dart';
 import 'half_donut_chart.dart';
+import 'line_outdoor_temp_chart.dart';
+import 'line_set_temp_chart.dart';
 import 'pie_chart_widget.dart';
 import 'stacked_bar_chart.dart';
 
@@ -211,6 +214,15 @@ class ChartArea extends StatelessWidget {
         chart = _buildHalfDonutChart(chartProvider);
         accessibilityLabel =
             '반쪽 도넛 차트: 현재 사용량 ${chartProvider.pieChartData.currentUsage}kWh, 전체 용량 ${chartProvider.pieChartData.totalCapacity}kWh';
+      case ChartType.lineOutDoorTemp:
+        chart = _buildLineOutdoorTempChart(chartProvider);
+        accessibilityLabel = 'Line chart for outdoor temp';
+      case ChartType.lineSetTemp:
+        chart = _buildLineSetTempChart(chartProvider);
+        accessibilityLabel = 'Line chart for seting temp';
+      case ChartType.clusterStackBar:
+        chart = _buildClustterStackedBarChart(chartProvider);
+        accessibilityLabel = 'Cluster stack bar';
     }
 
     return Semantics(
@@ -237,6 +249,12 @@ class ChartArea extends StatelessWidget {
         return _buildDonutChartSummary(context, chartProvider);
       case ChartType.halfDonut:
         return _buildHalfDonutChartSummary(context, chartProvider);
+      case ChartType.lineOutDoorTemp:
+        return _buildLineOutdoorTempChartSumary(chartProvider);
+      case ChartType.lineSetTemp:
+        return _buildLineSetTempChartSumary();
+      case ChartType.clusterStackBar:
+        return _buildClusterStackBarChartSummary();
     }
   }
 
@@ -567,6 +585,14 @@ class ChartArea extends StatelessWidget {
     return PieChartWidget(data: chartProvider.pieChartData);
   }
 
+  Widget _buildLineOutdoorTempChart(ChartProvider chartProvider) {
+    return LineOutdoorTempChart(chartProvider: chartProvider);
+  }
+
+  Widget _buildLineSetTempChart(ChartProvider chartProvider) {
+    return LineSetTempChart(chartProvider: chartProvider);
+  }
+
   /// 라인 차트 빌드
   Widget _buildLineChart(ChartProvider chartProvider) {
     final List<LineChartDataModel> data = chartProvider.lineChartData;
@@ -856,6 +882,17 @@ class ChartArea extends StatelessWidget {
   /// 스택형 막대 차트 빌드
   Widget _buildStackedBarChart(ChartProvider chartProvider) {
     return StackedBarChart(
+      data: chartProvider.stackedBarChartData,
+      title: '월별 에너지 사용량',
+      xAxisTitle: '월',
+      yAxisTitle: '사용량 (kWh)',
+      maxY: chartProvider.maxStackedBarChartValue * 1.1,
+      animationDuration: const Duration(milliseconds: 1000),
+    );
+  }
+  /// Cluster stack bar chart
+  Widget _buildClustterStackedBarChart(ChartProvider chartProvider) {
+    return ClusteredStackedBarChart(
       data: chartProvider.stackedBarChartData,
       title: '월별 에너지 사용량',
       xAxisTitle: '월',
@@ -1249,4 +1286,17 @@ class ChartArea extends StatelessWidget {
       ],
     );
   }
+
+  Widget _buildLineOutdoorTempChartSumary(ChartProvider chartProvider) {
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildLineSetTempChartSumary() {
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildClusterStackBarChartSummary() {
+    return const SizedBox.shrink();
+  }
+
 }

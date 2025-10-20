@@ -27,7 +27,6 @@ class HomeScreen extends StatelessWidget {
               child: CircularProgressIndicator(),
             );
           }
-
           return LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
               // 반응형 브레이크포인트: 768px

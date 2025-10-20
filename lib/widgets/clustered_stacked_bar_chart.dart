@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
@@ -7,8 +9,8 @@ import '../models/chart_data_models.dart';
 ///
 /// fl_chart 라이브러리를 사용하여 4개 카테고리(Base, AC, Heating, Other)의
 /// 에너지 사용량을 스택형 막대 차트로 표시합니다.
-class StackedBarChart extends StatefulWidget {
-  const StackedBarChart({
+class ClusteredStackedBarChart extends StatefulWidget {
+  const ClusteredStackedBarChart({
     super.key,
     required this.data,
     required this.title,
@@ -33,10 +35,10 @@ class StackedBarChart extends StatefulWidget {
   final Duration animationDuration;
 
   @override
-  State<StackedBarChart> createState() => _StackedBarChartState();
+  State<ClusteredStackedBarChart> createState() => _StackedBarChartState();
 }
 
-class _StackedBarChartState extends State<StackedBarChart>
+class _StackedBarChartState extends State<ClusteredStackedBarChart>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -85,30 +87,72 @@ class _StackedBarChartState extends State<StackedBarChart>
             child: AnimatedBuilder(
               animation: _animation,
               builder: (BuildContext context, Widget? child) {
-                return BarChart(
-                  BarChartData(
-                    alignment: BarChartAlignment.spaceAround,
-                    maxY: widget.maxY ?? _calculateMaxY(),
-                    barTouchData: widget.enableInteraction
-                        ? _buildBarTouchData()
-                        : BarTouchData(enabled: false),
-                    titlesData: _buildTitlesData(),
-                    borderData: FlBorderData(
-                      show: true,
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    gridData: FlGridData(
-                      drawVerticalLine: false,
-                      horizontalInterval: (widget.maxY ?? _calculateMaxY()) / 5,
-                      getDrawingHorizontalLine: (double value) {
-                        return FlLine(
-                          color: Colors.grey.shade300,
-                          strokeWidth: 1,
-                        );
-                      },
-                    ),
-                    barGroups: _createBarGroups(),
-                  ),
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    final chartWidth = constraints.maxWidth;
+                    return BarChart(
+                      BarChartData(
+                        alignment: BarChartAlignment.spaceAround,
+                        maxY: widget.maxY ?? _calculateMaxY(),
+                        barTouchData: widget.enableInteraction
+                            ? _buildBarTouchData()
+                            : BarTouchData(enabled: false),
+                        titlesData: _buildTitlesData(),
+                        borderData: FlBorderData(
+                          show: true,
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        gridData: FlGridData(
+                          drawVerticalLine: false,
+                          horizontalInterval: (widget.maxY ?? _calculateMaxY()) / 5,
+                          getDrawingHorizontalLine: (double value) {
+                            return FlLine(
+                              color: Colors.grey.shade300,
+                              strokeWidth: 1,
+                            );
+                          },
+                        ),
+                        barGroups: _createBarGroups(),
+                        extraLinesData: ExtraLinesData(
+                          horizontalLines: [
+                            HorizontalLine(
+                              y: 25,
+                              color: Colors.amber,
+                              strokeWidth: 1,
+                              dashArray: [20, 4],
+                               sizedPicture: SizedPicture(
+                                 createCustomPicture(
+                                   value: '25',
+                                   valueBgColor: Colors.green,
+                                   valueTextColor: Colors.white,
+                                   radius: 4,
+                                   width: chartWidth - 100,
+                                   y: 10,
+                                   fontSize: 14,
+                                   labelPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                 ),
+                                 40,
+                                 20,
+                               ),
+                              // label: HorizontalLineLabel(
+                              //   show: true,
+                              //   alignment: Alignment.centerRight,
+                              //   style: const TextStyle(
+                              //     color: Colors.black,
+                              //     fontWeight: FontWeight.bold,
+                              //     fontSize: 14,
+                              //   ),
+                              //   labelResolver: (line) => '25',
+                               
+                              //   padding: const EdgeInsets.symmetric(
+                              //       horizontal: 8, vertical: 4),
+                              // ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
                 );
               },
             ),
@@ -122,6 +166,83 @@ class _StackedBarChartState extends State<StackedBarChart>
         ],
       ),
     );
+  }
+
+  ui.Picture createCustomPicture({
+    HorizontalLine? line,
+    String Function(HorizontalLine)? labelResolver,
+    double width = 200,
+    double y = 10,
+    String value = '25',
+    Color valueBgColor = Colors.green,
+    Color valueTextColor = Colors.white,
+    double radius = 4,
+    double horizontalPadding = 10,
+    double verticalPadding = 4,
+    double fontSize = 14,
+    EdgeInsets labelPadding = const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+  }) {
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+
+
+    final label = value; // The value to display
+
+    // Style for the label
+    final textSpan = TextSpan(
+      text: label,
+      style: TextStyle(
+        color: valueTextColor,
+        fontSize: fontSize,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+    final textPainter = TextPainter(
+      text: textSpan,
+      textDirection: TextDirection.ltr,
+    )..layout();
+
+    final bgWidth = textPainter.width + 2 * horizontalPadding;
+    final bgHeight = textPainter.height + 2 * verticalPadding;
+
+    // Compute offset using alignment and padding to match labelResolver.
+    double labelX = width;
+    double labelY = y;
+
+    // CenterRight alignment:
+    // - X should be at the end of the horizontal line
+    // - Y should be centered vertically with the line
+    labelX = width;
+    labelY = y - bgHeight / 2;
+
+    // Add padding if needed (for exact match with HorizontalLineLabel)
+    labelX += labelPadding.right;
+    labelY += labelPadding.top;
+
+    final rect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(
+        labelX,
+        labelY,
+        bgWidth,
+        bgHeight,
+      ),
+      Radius.circular(radius),
+    );
+
+    // Draw background
+    final bgPaint = Paint()
+      ..color = valueBgColor
+      ..style = PaintingStyle.fill;
+    canvas.drawRRect(rect, bgPaint);
+
+    // Draw text in rect with horizontal/vertical padding
+    final textOffset = Offset(
+      labelX + horizontalPadding,
+      labelY + verticalPadding / 2,
+    );
+    textPainter.paint(canvas, textOffset);
+
+    return recorder.endRecording();
   }
 
   /// 막대 터치 데이터 설정
@@ -277,7 +398,6 @@ class _StackedBarChartState extends State<StackedBarChart>
               color: Colors.grey.shade100,
             ),
           ),
-
           BarChartRodData(
             toY: item.totalUsage * _animation.value,
             rodStackItems: _createStackItems(item),

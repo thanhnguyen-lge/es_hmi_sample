@@ -124,6 +124,48 @@ class ControlPanel extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 8),
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: _buildChartTypeButton(
+                  context,
+                  chartProvider,
+                  chartType: ChartType.lineOutDoorTemp,
+                  icon: ChartType.lineOutDoorTemp.icon,
+                  label: ChartType.lineOutDoorTemp.displayName,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildChartTypeButton(
+                  context,
+                  chartProvider,
+                  chartType: ChartType.lineSetTemp,
+                  icon: ChartType.lineSetTemp.icon,
+                  label: ChartType.lineSetTemp.displayName,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: _buildChartTypeButton(
+                  context,
+                  chartProvider,
+                  chartType: ChartType.clusterStackBar,
+                  icon: ChartType.clusterStackBar.icon,
+                  label: ChartType.clusterStackBar.displayName,
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: SizedBox.shrink(),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -180,6 +222,12 @@ class ControlPanel extends StatelessWidget {
         return _buildDonutChartSliders(context, chartProvider);
       case ChartType.halfDonut:
         return _buildHalfDonutChartSliders(context, chartProvider);
+      case ChartType.lineOutDoorTemp:
+        return _buildLineChartSliders(context, chartProvider);
+      case ChartType.lineSetTemp:
+        return _buildLineChartSliders(context, chartProvider);
+      case ChartType.clusterStackBar:
+        return _buildStackedBarChartSliders(context, chartProvider);
     }
   }
 
