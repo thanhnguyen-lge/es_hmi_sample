@@ -11,24 +11,33 @@ void main() {
       testData = <StackedBarChartData>[
         StackedBarChartData.fromUsageData(
           category: 'Jan',
-          baseUsage: 45.0,
-          acUsage: 15.0,
-          heatingUsage: 8.0,
-          etcUsage: 12.0,
+          dhwUsage: 45.0,
+          coolUsage: 15.0,
+          heatUsage: 8.0,
+          lastYearTotal: 75.0,
+          lastYearDhw: 40.0,
+          lastYearCool: 20.0,
+          lastYearHeat: 15.0,
         ),
         StackedBarChartData.fromUsageData(
           category: 'Feb',
-          baseUsage: 42.0,
-          acUsage: 12.0,
-          heatingUsage: 18.0,
-          etcUsage: 10.0,
+          dhwUsage: 42.0,
+          coolUsage: 12.0,
+          heatUsage: 18.0,
+          lastYearTotal: 82.0,
+          lastYearDhw: 45.0,
+          lastYearCool: 18.0,
+          lastYearHeat: 19.0,
         ),
         StackedBarChartData.fromUsageData(
           category: 'Mar',
-          baseUsage: 48.0,
-          acUsage: 20.0,
-          heatingUsage: 5.0,
-          etcUsage: 15.0,
+          dhwUsage: 48.0,
+          coolUsage: 20.0,
+          heatUsage: 5.0,
+          lastYearTotal: 88.0,
+          lastYearDhw: 50.0,
+          lastYearCool: 25.0,
+          lastYearHeat: 13.0,
         ),
       ];
     });
@@ -97,10 +106,10 @@ void main() {
       );
 
       // Then
-      expect(find.text('Base'), findsOneWidget);
-      expect(find.text('AC'), findsOneWidget);
-      expect(find.text('Heating'), findsOneWidget);
-      expect(find.text('Other'), findsOneWidget);
+      expect(find.text('DHW only'), findsOneWidget);
+      expect(find.text('Cool'), findsOneWidget);
+      expect(find.text('Heat'), findsOneWidget);
+      expect(find.text('Last Year'), findsOneWidget);
     });
 
     testWidgets('StackedBarChart는 범례를 숨길 수 있어야 합니다',
@@ -121,10 +130,10 @@ void main() {
       );
 
       // Then
-      expect(find.text('Base'), findsNothing);
-      expect(find.text('AC'), findsNothing);
-      expect(find.text('Heating'), findsNothing);
-      expect(find.text('Other'), findsNothing);
+      expect(find.text('DHW only'), findsNothing);
+      expect(find.text('Cool'), findsNothing);
+      expect(find.text('Heat'), findsNothing);
+      expect(find.text('Last Year'), findsNothing);
     });
 
     testWidgets('StackedBarChart는 빈 데이터로 렌더링되어야 합니다',
@@ -327,10 +336,10 @@ void main() {
         final List<StackedBarChartData> singleDataPoint = <StackedBarChartData>[
           StackedBarChartData.fromUsageData(
             category: 'Single',
-            baseUsage: 30.0,
-            acUsage: 10.0,
-            heatingUsage: 5.0,
-            etcUsage: 5.0,
+            dhwUsage: 30.0,
+            coolUsage: 10.0,
+            heatUsage: 5.0,
+            lastYearTotal: 50.0,
           ),
         ];
 
@@ -360,10 +369,10 @@ void main() {
           12,
           (int index) => StackedBarChartData.fromUsageData(
             category: 'Month${index + 1}',
-            baseUsage: 40.0 + (index * 2),
-            acUsage: 10.0 + (index * 1.5),
-            heatingUsage: 5.0 + (index * 0.5),
-            etcUsage: 8.0 + (index * 1),
+            dhwUsage: 40.0 + (index * 2),
+            coolUsage: 10.0 + (index * 1.5),
+            heatUsage: 5.0 + (index * 0.5),
+            lastYearTotal: 70.0 + (index * 3),
           ),
         );
 

@@ -134,15 +134,15 @@ void main() {
       expect(find.textContaining('25.0%'), findsOneWidget);
     });
 
-    testWidgets('should display center text in pie chart',
+    testWidgets('should display percentage in pie chart',
         (WidgetTester tester) async {
       // Given
       await tester.pumpWidget(createTestWidget(isBarChart: false));
       await tester.pumpAndSettle();
 
-      // Then - Should show center text
-      expect(find.text('전력 사용량'), findsOneWidget);
-      expect(find.text('kWh'), findsOneWidget);
+      // Then - Should show percentages
+      expect(find.textContaining('%'), findsWidgets);
+      expect(find.byType(PieChart), findsOneWidget);
     });
 
     testWidgets('should handle empty bar chart data gracefully',

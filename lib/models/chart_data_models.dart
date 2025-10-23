@@ -359,39 +359,56 @@ class StackedBarChartData {
     required this.category,
     required this.values,
     required this.colors,
+    this.lastYearTotal,
+    this.lastYearValues,
   });
 
-  /// 기본 생성자 (4개 카테고리용)
+  /// 기본 생성자 (3개 카테고리용 - DHW only, Cool, Heat)
   factory StackedBarChartData.fromUsageData({
     required String category,
-    required double baseUsage,
-    required double acUsage,
-    required double heatingUsage,
-    required double etcUsage,
+    required double dhwUsage,
+    required double coolUsage,
+    required double heatUsage,
+    double? lastYearTotal,
+    double? lastYearDhw,
+    double? lastYearCool,
+    double? lastYearHeat,
     ChartColorScheme? colorScheme,
   }) {
     final ChartColorScheme scheme =
         colorScheme ?? ChartColorScheme.defaultScheme;
 
+    // 작년 세부 데이터
+    Map<String, double>? lastYearValues;
+    if (lastYearDhw != null || lastYearCool != null || lastYearHeat != null) {
+      lastYearValues = <String, double>{
+        'DHW only': lastYearDhw ?? 0.0,
+        'Cool': lastYearCool ?? 0.0,
+        'Heat': lastYearHeat ?? 0.0,
+      };
+    }
+
     return StackedBarChartData(
       category: category,
       values: <String, double>{
-        'Base': baseUsage,
-        'AC': acUsage,
-        'Heating': heatingUsage,
-        'Other': etcUsage,
+        'DHW only': dhwUsage,
+        'Cool': coolUsage,
+        'Heat': heatUsage,
       },
       colors: <String, Color>{
-        'Base': scheme.baseUsageColor,
-        'AC': scheme.acUsageColor,
-        'Heating': scheme.heatingUsageColor,
-        'Other': scheme.etcUsageColor,
+        'DHW only': scheme.baseUsageColor, // 노란색
+        'Cool': scheme.acUsageColor, // 파란색
+        'Heat': scheme.heatingUsageColor, // 빨간색
       },
+      lastYearTotal: lastYearTotal,
+      lastYearValues: lastYearValues,
     );
   }
   final String category; // 카테고리 (예: 'Jan', 'Feb' 등)
   final Map<String, double> values; // 각 스택 항목의 값 (key: 항목명, value: 사용량)
   final Map<String, Color> colors;
+  final double? lastYearTotal; // 작년 동기 총 사용량 (비교용)
+  final Map<String, double>? lastYearValues; // 작년 세부 데이터
 
   /// 총 사용량 계산
   double get totalUsage {
@@ -423,11 +440,18 @@ class StackedBarChartData {
     String? category,
     Map<String, double>? values,
     Map<String, Color>? colors,
+    double? lastYearTotal,
+    Map<String, double>? lastYearValues,
   }) {
     return StackedBarChartData(
       category: category ?? this.category,
       values: values ?? Map<String, double>.from(this.values),
       colors: colors ?? Map<String, Color>.from(this.colors),
+      lastYearTotal: lastYearTotal ?? this.lastYearTotal,
+      lastYearValues: lastYearValues ??
+          (this.lastYearValues != null
+              ? Map<String, double>.from(this.lastYearValues!)
+              : null),
     );
   }
 

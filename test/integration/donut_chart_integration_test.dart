@@ -87,10 +87,15 @@ void main() {
       expect(chartProvider.currentChartType, ChartType.donut);
       expect(chartProvider.isDonutChart, true);
 
-      // donut -> bar (순환)
+      // donut -> halfDonut
+      chartProvider.toggleChartType();
+      expect(chartProvider.currentChartType, ChartType.halfDonut);
+      expect(chartProvider.isDonutChart, false);
+
+      // halfDonut -> bar (순환)
       chartProvider.toggleChartType();
       expect(chartProvider.currentChartType, ChartType.bar);
-      expect(chartProvider.isDonutChart, false);
+      expect(chartProvider.isBarChart, true);
     });
 
     testWidgets('도넛 차트 경계값 테스트', (WidgetTester tester) async {

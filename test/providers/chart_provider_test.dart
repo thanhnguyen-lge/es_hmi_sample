@@ -376,17 +376,17 @@ void main() {
         final List<StackedBarChartData> newData = <StackedBarChartData>[
           StackedBarChartData.fromUsageData(
             category: 'Test1',
-            baseUsage: 30.0,
-            acUsage: 20.0,
-            heatingUsage: 10.0,
-            etcUsage: 15.0,
+            dhwUsage: 30.0,
+            coolUsage: 20.0,
+            heatUsage: 10.0,
+            lastYearTotal: 75.0,
           ),
           StackedBarChartData.fromUsageData(
             category: 'Test2',
-            baseUsage: 35.0,
-            acUsage: 25.0,
-            heatingUsage: 5.0,
-            etcUsage: 20.0,
+            dhwUsage: 35.0,
+            coolUsage: 25.0,
+            heatUsage: 5.0,
+            lastYearTotal: 85.0,
           ),
         ];
 
@@ -395,8 +395,8 @@ void main() {
         expect(provider.stackedBarChartData.length, 2);
         expect(provider.stackedBarChartData[0].category, 'Test1');
         expect(provider.stackedBarChartData[1].category, 'Test2');
-        expect(provider.stackedBarChartData[0].totalUsage, 75.0);
-        expect(provider.stackedBarChartData[1].totalUsage, 85.0);
+        expect(provider.stackedBarChartData[0].totalUsage, 60.0);
+        expect(provider.stackedBarChartData[1].totalUsage, 65.0);
       });
 
       test('스택형 차트 데이터 추가', () {
@@ -404,17 +404,17 @@ void main() {
 
         final StackedBarChartData newItem = StackedBarChartData.fromUsageData(
           category: 'NewMonth',
-          baseUsage: 40.0,
-          acUsage: 30.0,
-          heatingUsage: 8.0,
-          etcUsage: 12.0,
+          dhwUsage: 40.0,
+          coolUsage: 30.0,
+          heatUsage: 8.0,
+          lastYearTotal: 90.0,
         );
 
         provider.addStackedBarChartData(newItem);
 
         expect(provider.stackedBarChartData.length, initialCount + 1);
         expect(provider.stackedBarChartData.last.category, 'NewMonth');
-        expect(provider.stackedBarChartData.last.totalUsage, 90.0);
+        expect(provider.stackedBarChartData.last.totalUsage, 78.0);
       });
 
       test('스택형 차트 데이터 제거', () {

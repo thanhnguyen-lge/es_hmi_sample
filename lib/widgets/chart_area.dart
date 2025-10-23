@@ -1027,14 +1027,14 @@ class ChartArea extends StatelessWidget {
   /// 카테고리별 색상 반환
   Color _getCategoryColor(String category) {
     switch (category) {
-      case 'Base':
-        return Colors.blue;
-      case 'AC':
-        return Colors.red;
-      case 'Heating':
-        return Colors.orange;
-      case 'Other':
-        return Colors.green;
+      case 'DHW only':
+        return Colors.amber; // 노란색
+      case 'Cool':
+        return Colors.blue; // 파란색
+      case 'Heat':
+        return Colors.red; // 빨간색
+      case 'Last Year':
+        return Colors.grey.shade400; // 회색
       default:
         return Colors.grey;
     }

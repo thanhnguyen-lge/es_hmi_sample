@@ -41,6 +41,7 @@ class _StackedBarChartState extends State<StackedBarChart>
   late AnimationController _animationController;
   late Animation<double> _animation;
   int? _touchedGroupIndex;
+  int? _touchedBarIndex; // 0: 올해, 1: 작년
 
   @override
   void initState() {
@@ -147,9 +148,11 @@ class _StackedBarChartState extends State<StackedBarChart>
               barTouchResponse == null ||
               barTouchResponse.spot == null) {
             _touchedGroupIndex = null;
+            _touchedBarIndex = null;
             return;
           }
           _touchedGroupIndex = barTouchResponse.spot!.touchedBarGroupIndex;
+          _touchedBarIndex = barTouchResponse.spot!.touchedRodDataIndex;
         });
       },
     );
@@ -166,15 +169,49 @@ class _StackedBarChartState extends State<StackedBarChart>
     final StringBuffer tooltip = StringBuffer();
 
     tooltip.writeln(data.category);
-    tooltip.writeln('총 사용량: ${data.totalUsage.toStringAsFixed(1)}kWh');
-    tooltip.writeln();
 
-    // 각 스택 아이템 정보 추가
-    data.values.forEach((String key, double value) {
-      final double percentage = data.getPercentage(key);
-      tooltip.writeln(
-          '$key: ${value.toStringAsFixed(1)}kWh (${percentage.toStringAsFixed(1)}%)');
-    });
+    // rodIndex 0: 올해 데이터 (스택형), rodIndex 1: 작년 데이터 (회색)
+    if (rodIndex == 0) {
+      // 올해 데이터
+      tooltip.writeln('올해 총 사용량: ${data.totalUsage.toStringAsFixed(1)}kWh');
+      tooltip.writeln();
+
+      // 각 스택 아이템 정보 추가
+      data.values.forEach((String key, double value) {
+        final double percentage = data.getPercentage(key);
+        tooltip.writeln(
+            '$key: ${value.toStringAsFixed(1)}kWh (${percentage.toStringAsFixed(1)}%)');
+      });
+    } else if (rodIndex == 1 && data.lastYearTotal != null) {
+      // 작년 데이터
+      tooltip.writeln('작년 총 사용량: ${data.lastYearTotal!.toStringAsFixed(1)}kWh');
+      tooltip.writeln();
+
+      // 작년 세부 데이터가 있으면 표시
+      if (data.lastYearValues != null && data.lastYearValues!.isNotEmpty) {
+        final double lastYearSum = data.lastYearValues!.values
+            .fold(0.0, (double sum, double value) => sum + value);
+
+        data.lastYearValues!.forEach((String key, double value) {
+          final double percentage =
+              lastYearSum > 0 ? (value / lastYearSum) * 100 : 0.0;
+          tooltip.writeln(
+              '$key: ${value.toStringAsFixed(1)}kWh (${percentage.toStringAsFixed(1)}%)');
+        });
+        tooltip.writeln();
+      }
+
+      // 증감율 계산
+      final double diff = data.totalUsage - data.lastYearTotal!;
+      final double changePercent = (diff / data.lastYearTotal!) * 100;
+      if (diff > 0) {
+        tooltip.write('전년 대비 ↑${changePercent.toStringAsFixed(1)}% 증가');
+      } else if (diff < 0) {
+        tooltip.write('전년 대비 ↓${changePercent.abs().toStringAsFixed(1)}% 감소');
+      } else {
+        tooltip.write('전년 대비 동일');
+      }
+    }
 
     return BarTooltipItem(
       tooltip.toString().trim(),
@@ -262,37 +299,95 @@ class _StackedBarChartState extends State<StackedBarChart>
       final StackedBarChartData item = entry.value;
       final bool isTouched = index == _touchedGroupIndex;
 
+      // 올해 데이터 막대 (스택형)
+      final List<BarChartRodData> barRods = <BarChartRodData>[
+        BarChartRodData(
+          toY: item.totalUsage * _animation.value,
+          rodStackItems: _createStackItems(item),
+          width: isTouched ? 28 : 24,
+          borderRadius: BorderRadius.circular(2),
+        ),
+      ];
+
+      // 작년 데이터 막대 - 있는 경우에만 추가
+      if (item.lastYearTotal != null && item.lastYearTotal! > 0) {
+        final bool isLastYearTouched = isTouched && _touchedBarIndex == 1;
+
+        // 작년 막대가 터치되었고 세부 데이터가 있으면 스택형으로, 아니면 회색 단색으로
+        if (isLastYearTouched && item.lastYearValues != null) {
+          barRods.add(
+            BarChartRodData(
+              toY: item.lastYearTotal! * _animation.value,
+              rodStackItems: _createLastYearStackItems(item),
+              width: 28,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          );
+        } else {
+          barRods.add(
+            BarChartRodData(
+              toY: item.lastYearTotal! * _animation.value,
+              color: Colors.grey.shade400,
+              width: isTouched && _touchedBarIndex == 1 ? 28 : 24,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          );
+        }
+      }
+
       return BarChartGroupData(
         x: index,
-        barRods: <BarChartRodData>[
-          BarChartRodData(
-            toY: item.totalUsage * _animation.value,
-            rodStackItems: _createStackItems(item),
-            width: isTouched ? 35 : 30,
-            borderRadius: BorderRadius.circular(2),
-            backDrawRodData: BackgroundBarChartRodData(
-              show: true,
-              toY: widget.maxY ?? _calculateMaxY(),
-              color: Colors.grey.shade100,
-            ),
-          ),
-        ],
+        barsSpace: 0, // 막대 사이 간격 없음
+        barRods: barRods,
         showingTooltipIndicators: isTouched ? <int>[0] : <int>[],
       );
     }).toList();
   }
 
-  /// 스택 아이템 생성
+  /// 스택 아이템 생성 (올해 데이터)
   List<BarChartRodStackItem> _createStackItems(StackedBarChartData item) {
     final List<BarChartRodStackItem> stackItems = <BarChartRodStackItem>[];
     double cumulativeSum = 0;
 
     // 스택 순서 정의 (아래에서 위로)
-    final List<String> stackOrder = <String>['Base', 'AC', 'Heating', 'Other'];
+    final List<String> stackOrder = <String>['DHW only', 'Cool', 'Heat'];
 
     for (final String key in stackOrder) {
       if (item.values.containsKey(key)) {
         final double value = item.getValue(key);
+        final Color color = item.getColor(key);
+
+        stackItems.add(
+          BarChartRodStackItem(
+            cumulativeSum,
+            cumulativeSum + value,
+            color,
+          ),
+        );
+        cumulativeSum += value;
+      }
+    }
+
+    return stackItems;
+  }
+
+  /// 작년 데이터 스택 아이템 생성
+  List<BarChartRodStackItem> _createLastYearStackItems(
+      StackedBarChartData item) {
+    final List<BarChartRodStackItem> stackItems = <BarChartRodStackItem>[];
+
+    if (item.lastYearValues == null) {
+      return stackItems;
+    }
+
+    double cumulativeSum = 0;
+
+    // 스택 순서 정의 (아래에서 위로)
+    final List<String> stackOrder = <String>['DHW only', 'Cool', 'Heat'];
+
+    for (final String key in stackOrder) {
+      if (item.lastYearValues!.containsKey(key)) {
+        final double value = item.lastYearValues![key] ?? 0.0;
         final Color color = item.getColor(key);
 
         stackItems.add(
@@ -315,12 +410,23 @@ class _StackedBarChartState extends State<StackedBarChart>
       return 100;
     }
 
+    // 올해 데이터의 최대값
     final double maxUsage = widget.data
         .map((StackedBarChartData item) => item.totalUsage)
         .reduce((double max, double current) => current > max ? current : max);
 
+    // 작년 데이터의 최대값 (있는 경우)
+    final double maxLastYear = widget.data
+        .where((StackedBarChartData item) => item.lastYearTotal != null)
+        .map((StackedBarChartData item) => item.lastYearTotal!)
+        .fold(
+            0.0, (double max, double current) => current > max ? current : max);
+
+    // 두 값 중 더 큰 값 사용
+    final double maxValue = maxUsage > maxLastYear ? maxUsage : maxLastYear;
+
     // 여유를 두기 위해 10% 추가
-    return (maxUsage * 1.1).ceilToDouble();
+    return (maxValue * 1.1).ceilToDouble();
   }
 
   /// 범례 생성
@@ -336,14 +442,21 @@ class _StackedBarChartState extends State<StackedBarChart>
 
     // 정해진 순서로 정렬
     final List<String> orderedCategories = <String>[
-      'Base',
-      'AC',
-      'Heating',
-      'Other'
+      'DHW only',
+      'Cool',
+      'Heat',
     ];
     final List<String> displayCategories = orderedCategories
         .where((String category) => categories.contains(category))
         .toList();
+
+    // Last Year 범례 추가 (작년 데이터가 있는 경우)
+    final bool hasLastYearData = widget.data.any((StackedBarChartData item) =>
+        item.lastYearTotal != null && item.lastYearTotal! > 0);
+    if (hasLastYearData) {
+      displayCategories.add('Last Year');
+      categoryColors['Last Year'] = Colors.grey.shade400;
+    }
 
     return Wrap(
       spacing: 16,

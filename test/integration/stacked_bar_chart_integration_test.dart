@@ -28,17 +28,17 @@ void main() {
       final List<StackedBarChartData> newData = <StackedBarChartData>[
         StackedBarChartData.fromUsageData(
           category: 'TestMonth1',
-          baseUsage: 60.0,
-          acUsage: 40.0,
-          heatingUsage: 10.0,
-          etcUsage: 20.0,
+          dhwUsage: 60.0,
+          coolUsage: 40.0,
+          heatUsage: 10.0,
+          lastYearTotal: 130.0,
         ),
         StackedBarChartData.fromUsageData(
           category: 'TestMonth2',
-          baseUsage: 55.0,
-          acUsage: 35.0,
-          heatingUsage: 15.0,
-          etcUsage: 25.0,
+          dhwUsage: 55.0,
+          coolUsage: 35.0,
+          heatUsage: 15.0,
+          lastYearTotal: 125.0,
         ),
       ];
 
@@ -60,10 +60,10 @@ void main() {
       // When - 데이터 추가
       final StackedBarChartData newItem = StackedBarChartData.fromUsageData(
         category: 'NewMonth',
-        baseUsage: 40.0,
-        acUsage: 30.0,
-        heatingUsage: 8.0,
-        etcUsage: 12.0,
+        dhwUsage: 40.0,
+        coolUsage: 30.0,
+        heatUsage: 8.0,
+        lastYearTotal: 90.0,
       );
 
       chartProvider.addStackedBarChartData(newItem);
@@ -91,10 +91,9 @@ void main() {
 
         // Then - 계산 기능들이 올바르게 작동하는지 확인
         expect(firstItem.totalUsage, greaterThan(0));
-        expect(firstItem.getValue('Base'), greaterThanOrEqualTo(0));
-        expect(firstItem.getValue('AC'), greaterThanOrEqualTo(0));
-        expect(firstItem.getValue('Heating'), greaterThanOrEqualTo(0));
-        expect(firstItem.getValue('Other'), greaterThanOrEqualTo(0));
+        expect(firstItem.getValue('DHW only'), greaterThanOrEqualTo(0));
+        expect(firstItem.getValue('Cool'), greaterThanOrEqualTo(0));
+        expect(firstItem.getValue('Heat'), greaterThanOrEqualTo(0));
 
         // 백분율 합이 100%인지 확인
         final Map<String, double> percentages = firstItem.percentages;
