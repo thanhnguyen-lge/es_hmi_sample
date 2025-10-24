@@ -13,6 +13,7 @@ class ClusteredStackedBarChart extends StatefulWidget {
   const ClusteredStackedBarChart({
     super.key,
     required this.data,
+    required this.data2,
     required this.title,
     required this.xAxisTitle,
     required this.yAxisTitle,
@@ -24,6 +25,7 @@ class ClusteredStackedBarChart extends StatefulWidget {
     this.animationDuration = const Duration(milliseconds: 800),
   });
   final List<StackedBarChartData> data;
+  final List<StackedBarChartData> data2;
   final String title;
   final String xAxisTitle;
   final String yAxisTitle;
@@ -134,19 +136,6 @@ class _StackedBarChartState extends State<ClusteredStackedBarChart>
                                  40,
                                  20,
                                ),
-                              // label: HorizontalLineLabel(
-                              //   show: true,
-                              //   alignment: Alignment.centerRight,
-                              //   style: const TextStyle(
-                              //     color: Colors.black,
-                              //     fontWeight: FontWeight.bold,
-                              //     fontSize: 14,
-                              //   ),
-                              //   labelResolver: (line) => '25',
-                               
-                              //   padding: const EdgeInsets.symmetric(
-                              //       horizontal: 8, vertical: 4),
-                              // ),
                             ),
                           ],
                         ),
@@ -375,44 +364,60 @@ class _StackedBarChartState extends State<ClusteredStackedBarChart>
 
   /// 막대 그룹 생성
   List<BarChartGroupData> _createBarGroups() {
-    return widget.data
-        .asMap()
-        .entries
-        .map((MapEntry<int, StackedBarChartData> entry) {
-      final int index = entry.key;
-      final StackedBarChartData item = entry.value;
+    final int groupCount = [
+      widget.data.length,
+      widget.data2.length
+    ].reduce((a, b) => a > b ? a : b);
+
+    return List.generate(groupCount, (int index) {
       final bool isTouched = index == _touchedGroupIndex;
+
+      // Get item from each data list; if list too short, use null or fallback (invisible bar)
+      final StackedBarChartData? item1 =
+          index < widget.data.length ? widget.data[index] : null;
+      final StackedBarChartData? item2 =
+          index < widget.data2.length ? widget.data2[index] : null;
+
+      List<BarChartRodData> rods = [];
+
+      if (item1 != null) {
+        rods.add(
+          BarChartRodData(
+            toY: item1.totalUsage * _animation.value,
+            rodStackItems: _createStackItems(item1),
+            width: isTouched ? 35 : 30,
+            borderRadius: BorderRadius.circular(2),
+            backDrawRodData: BackgroundBarChartRodData(
+              show: true,
+              toY: widget.maxY ?? _calculateMaxY(),
+              color: Colors.grey.shade100,
+            ),
+          ),
+        );
+      }
+      if (item2 != null) {
+        rods.add(
+          BarChartRodData(
+            toY: item2.totalUsage * _animation.value,
+            rodStackItems: _createStackItems(item2),
+            width: isTouched ? 35 : 30,
+            borderRadius: BorderRadius.circular(2),
+            backDrawRodData: BackgroundBarChartRodData(
+              show: true,
+              toY: widget.maxY ?? _calculateMaxY(),
+              color: Colors.grey.shade100,
+            ),
+          ),
+        );
+      }
 
       return BarChartGroupData(
         x: index,
         barsSpace: 0,
-        barRods: <BarChartRodData>[
-          BarChartRodData(
-            toY: item.totalUsage * _animation.value,
-            rodStackItems: _createStackItems(item),
-            width: isTouched ? 35 : 30,
-            borderRadius: BorderRadius.circular(2),
-            backDrawRodData: BackgroundBarChartRodData(
-              show: true,
-              toY: widget.maxY ?? _calculateMaxY(),
-              color: Colors.grey.shade100,
-            ),
-          ),
-          BarChartRodData(
-            toY: item.totalUsage * _animation.value,
-            rodStackItems: _createStackItems(item),
-            width: isTouched ? 35 : 30,
-            borderRadius: BorderRadius.circular(2),
-            backDrawRodData: BackgroundBarChartRodData(
-              show: true,
-              toY: widget.maxY ?? _calculateMaxY(),
-              color: Colors.grey.shade100,
-            ),
-          ),
-        ],
-        showingTooltipIndicators: isTouched ? <int>[0] : <int>[],
+        barRods: rods,
+        showingTooltipIndicators: isTouched ? List.generate(rods.length, (i) => i) : <int>[],
       );
-    }).toList();
+    });
   }
 
   /// 스택 아이템 생성

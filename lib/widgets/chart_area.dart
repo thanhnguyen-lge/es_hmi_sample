@@ -894,6 +894,7 @@ class ChartArea extends StatelessWidget {
   Widget _buildClustterStackedBarChart(ChartProvider chartProvider) {
     return ClusteredStackedBarChart(
       data: chartProvider.stackedBarChartData,
+      data2: chartProvider.stackedBarChartData2,
       title: '월별 에너지 사용량',
       xAxisTitle: '월',
       yAxisTitle: '사용량 (kWh)',
