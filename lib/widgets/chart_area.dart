@@ -8,6 +8,7 @@ import 'donut_chart.dart';
 import 'half_donut_chart.dart';
 import 'pie_chart_widget.dart';
 import 'stacked_bar_chart.dart';
+import 'temperature_curve_chart.dart';
 
 class ChartArea extends StatelessWidget {
   const ChartArea({super.key});
@@ -211,6 +212,10 @@ class ChartArea extends StatelessWidget {
         chart = _buildHalfDonutChart(chartProvider);
         accessibilityLabel =
             '반쪽 도넛 차트: 현재 사용량 ${chartProvider.pieChartData.currentUsage}kWh, 전체 용량 ${chartProvider.pieChartData.totalCapacity}kWh';
+      case ChartType.setTemp:
+        chart = _buildTemperatureCurveChart(chartProvider);
+        accessibilityLabel =
+            '온도 설정 곡선 차트: ${chartProvider.temperatureCurveData.lines.length}개의 설정 곡선';
     }
 
     return Semantics(
@@ -237,6 +242,8 @@ class ChartArea extends StatelessWidget {
         return _buildDonutChartSummary(context, chartProvider);
       case ChartType.halfDonut:
         return _buildHalfDonutChartSummary(context, chartProvider);
+      case ChartType.setTemp:
+        return _buildTemperatureCurveSummary(context, chartProvider);
     }
   }
 
@@ -1247,6 +1254,65 @@ class ChartArea extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  /// 온도 설정 곡선 차트 빌드
+  Widget _buildTemperatureCurveChart(ChartProvider chartProvider) {
+    return TemperatureCurveChart(
+      data: chartProvider.temperatureCurveData,
+      title: 'Set Temp.',
+      showTitle: false,
+      animationDuration: const Duration(milliseconds: 1200),
+    );
+  }
+
+  /// 온도 설정 곡선 차트 요약 정보
+  Widget _buildTemperatureCurveSummary(
+      BuildContext context, ChartProvider chartProvider) {
+    final TemperatureCurveData data = chartProvider.temperatureCurveData;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.deepOrange.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.deepOrange.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Icon(
+                Icons.thermostat,
+                size: 16,
+                color: Colors.deepOrange.shade600,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '온도 범위: ${data.minOutdoorTemp.toStringAsFixed(0)}~${data.maxOutdoorTemp.toStringAsFixed(0)}°F',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.deepOrange.shade700,
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Padding(
+            padding: const EdgeInsets.only(left: 24),
+            child: Text(
+              '설정 곡선: Air (난방/냉방), Water (난방)\n'
+              '같은 실외 온도에 각기 다른 목표 온도 설정 가능',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.deepOrange.shade600,
+                    fontSize: 11,
+                  ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

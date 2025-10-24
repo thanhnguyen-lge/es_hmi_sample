@@ -124,6 +124,20 @@ class ControlPanel extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 8),
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: _buildChartTypeButton(
+                  context,
+                  chartProvider,
+                  chartType: ChartType.setTemp,
+                  icon: ChartType.setTemp.icon,
+                  label: ChartType.setTemp.displayName,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -180,6 +194,8 @@ class ControlPanel extends StatelessWidget {
         return _buildDonutChartSliders(context, chartProvider);
       case ChartType.halfDonut:
         return _buildHalfDonutChartSliders(context, chartProvider);
+      case ChartType.setTemp:
+        return _buildSetTempChartSliders(context, chartProvider);
     }
   }
 
@@ -604,6 +620,57 @@ class ControlPanel extends StatelessWidget {
         );
       },
     );
+  }
+
+  /// Set Temp Chart용 슬라이더들
+  List<Widget> _buildSetTempChartSliders(
+      BuildContext context, ChartProvider chartProvider) {
+    return <Widget>[
+      Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.deepOrange.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.deepOrange.withValues(alpha: 0.2)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Icon(
+                  Icons.info_outline,
+                  size: 16,
+                  color: Colors.deepOrange.shade600,
+                ),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    '온도 설정 곡선 차트는 샘플 데이터를 표시합니다.',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              '• 빨간색: Air (난방/냉방)\n'
+              '• 파란색: Water (난방)\n'
+              '• 회색: 기준 온도\n'
+              '• Air와 Water는 같은 실외 온도에서\n'
+              '  각각 다른 목표 온도 설정 가능',
+              style: TextStyle(
+                fontSize: 11,
+                color: Colors.black54,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ];
   }
 }
 

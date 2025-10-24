@@ -8,6 +8,7 @@ enum ChartType {
   stackedBar, // 스택형 막대 차트
   donut, // 도넛 차트
   halfDonut, // 반쪽 도넛 차트
+  setTemp, // 온도 설정 곡선 차트
 }
 
 extension ChartTypeExtension on ChartType {
@@ -25,6 +26,8 @@ extension ChartTypeExtension on ChartType {
         return '도넛 그래프';
       case ChartType.halfDonut:
         return '반쪽 도넛 그래프';
+      case ChartType.setTemp:
+        return '온도 설정 곡선';
     }
   }
 
@@ -42,6 +45,8 @@ extension ChartTypeExtension on ChartType {
         return Icons.donut_large;
       case ChartType.halfDonut:
         return Icons.donut_small;
+      case ChartType.setTemp:
+        return Icons.thermostat;
     }
   }
 
@@ -55,6 +60,8 @@ extension ChartTypeExtension on ChartType {
         return Colors.orange;
       case ChartType.stackedBar:
         return Colors.purple;
+      case ChartType.setTemp:
+        return Colors.deepOrange;
       case ChartType.donut:
         return Colors.teal;
       case ChartType.halfDonut:
@@ -495,5 +502,141 @@ class StackedBarChartData {
       }
     }
     return true;
+  }
+}
+
+/// 온도 설정 곡선 포인트
+class TemperatureCurvePoint {
+  const TemperatureCurvePoint({
+    required this.outdoorTemp,
+    required this.targetTemp,
+  });
+
+  final double outdoorTemp; // 실외 온도 (°F)
+  final double targetTemp; // 목표 온도 (°F)
+
+  TemperatureCurvePoint copyWith({
+    double? outdoorTemp,
+    double? targetTemp,
+  }) {
+    return TemperatureCurvePoint(
+      outdoorTemp: outdoorTemp ?? this.outdoorTemp,
+      targetTemp: targetTemp ?? this.targetTemp,
+    );
+  }
+}
+
+/// 온도 설정 곡선 라인
+class TemperatureCurveLine {
+  const TemperatureCurveLine({
+    required this.name,
+    required this.points,
+    required this.color,
+    this.isHeating = true,
+  });
+
+  final String name; // 라인 이름 (예: Air, Water)
+  final List<TemperatureCurvePoint> points; // 포인트 리스트
+  final Color color; // 라인 색상
+  final bool isHeating; // true: 난방, false: 냉방
+
+  TemperatureCurveLine copyWith({
+    String? name,
+    List<TemperatureCurvePoint>? points,
+    Color? color,
+    bool? isHeating,
+  }) {
+    return TemperatureCurveLine(
+      name: name ?? this.name,
+      points: points ?? this.points,
+      color: color ?? this.color,
+      isHeating: isHeating ?? this.isHeating,
+    );
+  }
+}
+
+/// 온도 설정 곡선 차트 데이터
+class TemperatureCurveData {
+  const TemperatureCurveData({
+    required this.lines,
+    this.minOutdoorTemp = -20.0,
+    this.maxOutdoorTemp = 50.0,
+    this.minTargetTemp = 0.0,
+    this.maxTargetTemp = 80.0,
+    this.referenceTempLine,
+  });
+
+  factory TemperatureCurveData.sample() {
+    return const TemperatureCurveData(
+      lines: <TemperatureCurveLine>[
+        // Air 구간 1: -30 ~ 5도
+        TemperatureCurveLine(
+          name: 'Air',
+          points: <TemperatureCurvePoint>[
+            TemperatureCurvePoint(outdoorTemp: -20, targetTemp: 68),
+            TemperatureCurvePoint(outdoorTemp: 0, targetTemp: 65),
+            TemperatureCurvePoint(outdoorTemp: 5, targetTemp: 60),
+          ],
+          color: Colors.red,
+        ),
+        // 5 ~ 20도 구간: 끊김
+        // Air 구간 2: 20 ~ 50도
+        TemperatureCurveLine(
+          name: 'Air',
+          points: <TemperatureCurvePoint>[
+            TemperatureCurvePoint(outdoorTemp: 20, targetTemp: 40),
+            TemperatureCurvePoint(outdoorTemp: 30, targetTemp: 30),
+            TemperatureCurvePoint(outdoorTemp: 50, targetTemp: 24),
+          ],
+          color: Colors.red,
+        ),
+        // Water 구간 1: -30 ~ 5도
+        TemperatureCurveLine(
+          name: 'Water',
+          points: <TemperatureCurvePoint>[
+            TemperatureCurvePoint(outdoorTemp: -20, targetTemp: 50),
+            TemperatureCurvePoint(outdoorTemp: 0, targetTemp: 35),
+            TemperatureCurvePoint(outdoorTemp: 5, targetTemp: 32),
+          ],
+          color: Colors.blue,
+        ),
+        // 5 ~ 20도 구간: 끊김
+        // Water 구간 2: 20 ~ 50도
+        TemperatureCurveLine(
+          name: 'Water',
+          points: <TemperatureCurvePoint>[
+            TemperatureCurvePoint(outdoorTemp: 20, targetTemp: 30),
+            TemperatureCurvePoint(outdoorTemp: 30, targetTemp: 17),
+            TemperatureCurvePoint(outdoorTemp: 50, targetTemp: 12),
+          ],
+          color: Colors.blue,
+        ),
+      ],
+    );
+  }
+
+  final List<TemperatureCurveLine> lines; // 설정 곡선들
+  final double minOutdoorTemp; // 최소 실외 온도
+  final double maxOutdoorTemp; // 최대 실외 온도
+  final double minTargetTemp; // 최소 목표 온도
+  final double maxTargetTemp; // 최대 목표 온도
+  final TemperatureCurveLine? referenceTempLine; // 기준 온도 라인
+
+  TemperatureCurveData copyWith({
+    List<TemperatureCurveLine>? lines,
+    double? minOutdoorTemp,
+    double? maxOutdoorTemp,
+    double? minTargetTemp,
+    double? maxTargetTemp,
+    TemperatureCurveLine? referenceTempLine,
+  }) {
+    return TemperatureCurveData(
+      lines: lines ?? this.lines,
+      minOutdoorTemp: minOutdoorTemp ?? this.minOutdoorTemp,
+      maxOutdoorTemp: maxOutdoorTemp ?? this.maxOutdoorTemp,
+      minTargetTemp: minTargetTemp ?? this.minTargetTemp,
+      maxTargetTemp: maxTargetTemp ?? this.maxTargetTemp,
+      referenceTempLine: referenceTempLine ?? this.referenceTempLine,
+    );
   }
 }

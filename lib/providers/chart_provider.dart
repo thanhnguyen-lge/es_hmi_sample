@@ -10,6 +10,7 @@ class ChartProvider extends ChangeNotifier {
   PieChartDataModel _pieChartData = ChartDataHelper.getEmptyPieChartData();
   List<LineChartDataModel> _lineChartData = <LineChartDataModel>[];
   List<StackedBarChartData> _stackedBarChartData = <StackedBarChartData>[];
+  TemperatureCurveData _temperatureCurveData = TemperatureCurveData.sample();
   ChartType _currentChartType = ChartType.bar;
   ChartColorScheme _colorScheme = ChartColorScheme.defaultScheme;
   bool _isLoading = false;
@@ -26,12 +27,14 @@ class ChartProvider extends ChangeNotifier {
       List<LineChartDataModel>.unmodifiable(_lineChartData);
   List<StackedBarChartData> get stackedBarChartData =>
       List<StackedBarChartData>.unmodifiable(_stackedBarChartData);
+  TemperatureCurveData get temperatureCurveData => _temperatureCurveData;
   ChartType get currentChartType => _currentChartType;
   bool get isBarChart => _currentChartType == ChartType.bar;
   bool get isPieChart => _currentChartType == ChartType.pie;
   bool get isLineChart => _currentChartType == ChartType.line;
   bool get isStackedBarChart => _currentChartType == ChartType.stackedBar;
   bool get isDonutChart => _currentChartType == ChartType.donut;
+  bool get isSetTempChart => _currentChartType == ChartType.setTemp;
   ChartColorScheme get colorScheme => _colorScheme;
   bool get isLoading => _isLoading;
 
@@ -202,7 +205,45 @@ class ChartProvider extends ChangeNotifier {
     debugPrint('ChartProvider: 원형 그래프 전체 데이터 업데이트');
   }
 
-  /// 차트 타입 전환 (막대 → 원형 → 라인 → 스택형 막대 → 도넛 → 반쪽 도넛)
+  /// 온도 곡선 데이터 업데이트
+  void updateTemperatureCurveData(TemperatureCurveData newData) {
+    _temperatureCurveData = newData;
+    notifyListeners();
+    debugPrint('ChartProvider: 온도 곡선 데이터 업데이트');
+  }
+
+  /// 온도 곡선 포인트 업데이트
+  void updateTemperatureCurvePoint(
+      int lineIndex, int pointIndex, double newTargetTemp) {
+    if (lineIndex < 0 || lineIndex >= _temperatureCurveData.lines.length) {
+      debugPrint('ChartProvider: 잘못된 라인 인덱스 - $lineIndex');
+      return;
+    }
+
+    final TemperatureCurveLine line = _temperatureCurveData.lines[lineIndex];
+    if (pointIndex < 0 || pointIndex >= line.points.length) {
+      debugPrint('ChartProvider: 잘못된 포인트 인덱스 - $pointIndex');
+      return;
+    }
+
+    final List<TemperatureCurvePoint> newPoints =
+        List<TemperatureCurvePoint>.from(line.points);
+    newPoints[pointIndex] = newPoints[pointIndex].copyWith(
+      targetTemp: newTargetTemp,
+    );
+
+    final List<TemperatureCurveLine> newLines =
+        List<TemperatureCurveLine>.from(_temperatureCurveData.lines);
+    newLines[lineIndex] = line.copyWith(points: newPoints);
+
+    _temperatureCurveData = _temperatureCurveData.copyWith(lines: newLines);
+    notifyListeners();
+
+    debugPrint(
+        'ChartProvider: 온도 곡선 포인트 업데이트 - Line: $lineIndex, Point: $pointIndex, Temp: $newTargetTemp');
+  }
+
+  /// 차트 타입 전환 (막대 → 원형 → 라인 → 스택형 막대 → 도넛 → 반쪽 도넛 → 온도 설정 곡선)
   void toggleChartType() {
     switch (_currentChartType) {
       case ChartType.bar:
@@ -216,6 +257,8 @@ class ChartProvider extends ChangeNotifier {
       case ChartType.donut:
         _currentChartType = ChartType.halfDonut;
       case ChartType.halfDonut:
+        _currentChartType = ChartType.setTemp;
+      case ChartType.setTemp:
         _currentChartType = ChartType.bar;
     }
     notifyListeners();
